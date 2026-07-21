@@ -19,9 +19,41 @@
     </div>
   </div>
 
+  <div class="section-header">
+    <h2>Notes</h2>
+    <a href="{{ url_for('notes.create_note', subject_id=subject.id) }}" class="btn btn-primary btn-sm">New note</a>
+  </div>
+
+  {% set subject_notes = subject.recent_notes() %}
+  {% if subject_notes %}
+    <div class="note-list">
+      {% for note in subject_notes %}
+        <a href="{{ url_for('notes.view_note', note_id=note.id) }}" class="note-row">
+          <div>
+            <h3>{{ note.title }}</h3>
+            {% if note.tag_list() %}
+              <div class="tag-list">
+                {% for tag in note.tag_list() %}
+                  <span class="tag-chip">{{ tag }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <span class="note-updated text-muted">Updated {{ note.updated_at.strftime('%b %d, %Y') }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No notes in this subject yet</h3>
+      <p class="text-muted">Add your first note to start capturing what you're studying.</p>
+      <a href="{{ url_for('notes.create_note', subject_id=subject.id) }}" class="btn btn-primary">Create a note</a>
+    </div>
+  {% endif %}
+
   <div class="empty-state">
-    <h3>Notes, flashcards, and quizzes coming soon</h3>
-    <p class="text-muted">This subject is ready — content sections will appear here as those modules are built.</p>
+    <h3>Flashcards and quizzes coming soon</h3>
+    <p class="text-muted">These sections will appear here as those modules are built.</p>
   </div>
 </div>
 {% endblock %}

@@ -76,7 +76,9 @@ def _register_blueprints(app):
     from app.core.routes import core_bp
     from app.auth.routes import auth_bp
     from app.subjects.routes import subjects_bp
+    from app.notes.routes import notes_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(subjects_bp, url_prefix="/subjects")
+    app.register_blueprint(notes_bp, url_prefix="/notes")

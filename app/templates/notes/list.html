@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Notes · Study Assistant{% endblock %}
+{% block content %}
+<div class="container notes-page">
+  <div class="page-header">
+    <h1>Notes</h1>
+    <a href="{{ url_for('notes.create_note') }}" class="btn btn-primary">New note</a>
+  </div>
+
+  <form method="GET" class="filter-bar" role="search">
+    <input
+      type="search"
+      name="search"
+      class="form-control"
+      placeholder="Search notes"
+      value="{{ search }}"
+      aria-label="Search notes"
+    >
+    <select name="subject_id" class="form-control" aria-label="Filter by subject">
+      <option value="">All subjects</option>
+      {% for id, name in subjects %}
+        <option value="{{ id }}" {% if selected_subject_id == id %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+    <input
+      type="text"
+      name="tag"
+      class="form-control"
+      placeholder="Filter by tag"
+      value="{{ selected_tag }}"
+      aria-label="Filter by tag"
+    >
+    <select name="sort" class="form-control" aria-label="Sort notes">
+      {% for key, (_, label) in sort_options.items() %}
+        <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Apply</button>
+  </form>
+
+  {% if notes %}
+    <div class="note-list">
+      {% for note in notes %}
+        <a href="{{ url_for('notes.view_note', note_id=note.id) }}" class="note-row">
+          <div>
+            <h3>{{ note.title }}</h3>
+            <p class="text-muted note-subject">{{ note.subject.name }}</p>
+            {% if note.tag_list() %}
+              <div class="tag-list">
+                {% for tag in note.tag_list() %}
+                  <span class="tag-chip">{{ tag }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <span class="note-updated text-muted">Updated {{ note.updated_at.strftime('%b %d, %Y') }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      {% if search or selected_subject_id or selected_tag %}
+        <h3>No notes match your filters</h3>
+        <p class="text-muted">Try a different search term or clear your filters.</p>
+        <a href="{{ url_for('notes.list_notes') }}" class="btn btn-secondary">Clear filters</a>
+      {% else %}
+        <h3>No notes yet</h3>
+        <p class="text-muted">Create your first note to start capturing what you're studying.</p>
+        <a href="{{ url_for('notes.create_note') }}" class="btn btn-primary">Create a note</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

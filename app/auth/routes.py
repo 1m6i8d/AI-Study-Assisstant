@@ -13,7 +13,7 @@ auth_bp = Blueprint("auth", __name__, template_folder="../templates/auth")
 @limiter.limit("10 per hour")
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for("dashboard.index"))
+        return redirect(url_for("subjects.list_subjects"))
 
     form = RegisterForm()
     if form.validate_on_submit():
@@ -35,7 +35,7 @@ def register():
 @limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("dashboard.index"))
+        return redirect(url_for("subjects.list_subjects"))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -48,7 +48,7 @@ def login():
         login_user(user, remember=bool(form.remember_me.data))
         next_page = request.args.get("next")
         flash(f"Welcome back, {user.username}.", "success")
-        return redirect(next_page or url_for("dashboard.index"))
+        return redirect(next_page or url_for("subjects.list_subjects"))
 
     return render_template("auth/login.html", form=form)
 

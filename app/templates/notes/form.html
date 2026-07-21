@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if mode == "edit" else "New" }} note · Study Assistant{% endblock %}
+{% block content %}
+<div class="container form-page form-page--wide">
+  <h1>{{ "Edit note" if mode == "edit" else "New note" }}</h1>
+
+  <form method="POST" novalidate class="card">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.title.label(class="form-label") }}
+      {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), autofocus=true) }}
+      {% for error in form.title.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.subject_id.label(class="form-label") }}
+      {{ form.subject_id(class="form-control" + (" is-invalid" if form.subject_id.errors else "")) }}
+      {% for error in form.subject_id.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.content.label(class="form-label") }}
+      {{ form.content(class="form-control" + (" is-invalid" if form.content.errors else ""), rows=10) }}
+      {% for error in form.content.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.tags.label(class="form-label") }}
+      {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else "")) }}
+      <span class="form-hint">{{ form.tags.description }}</span>
+      {% for error in form.tags.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit(class="btn btn-primary") }}
+      <a href="{{ url_for('notes.list_notes') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

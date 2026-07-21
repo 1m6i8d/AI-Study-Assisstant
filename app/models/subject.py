@@ -22,8 +22,12 @@ class Subject(db.Model):
     owner = db.relationship("User", backref=db.backref("subjects", lazy="dynamic"))
 
     # Populated once Notes/Flashcards/Quizzes/StudySessions models exist:
-    # notes = db.relationship("Note", backref="subject", lazy="dynamic", cascade="all, delete-orphan")
     # flashcards = db.relationship("Flashcard", backref="subject", lazy="dynamic", cascade="all, delete-orphan")
+
+    def recent_notes(self, limit=None):
+        """Return this subject's notes, most recently updated first."""
+        query = self.notes.order_by(db.desc("updated_at"))
+        return query.limit(limit).all() if limit else query.all()
 
     def __repr__(self):
         return f"<Subject {self.name}>"

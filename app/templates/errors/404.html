@@ -1,9 +1,4 @@
-{% extends "base.html" %}
+{% extends "errors/_error_layout.html" %}
 {% block title %}Page not found · Study Assistant{% endblock %}
-{% block content %}
-<div class="container error-page">
-  <h1 class="error-code">404</h1>
-  <p class="error-message">This page doesn't exist. Check the URL or head back to your dashboard.</p>
-  <a href="{{ url_for('core.index') }}" class="btn btn-primary">Go to homepage</a>
-</div>
-{% endblock %}
+{% set code = "404" %}
+{% set message = "This page doesn't exist. Check the URL or head back to your dashboard." %}
