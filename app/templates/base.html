@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Study Assistant{% endblock %}</title>
+  <meta name="description" content="{% block description %}An AI-powered study assistant for organizing subjects, notes, flashcards, and quizzes.{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}Study Assistant{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Organize your studies with notes, flashcards, quizzes, and an AI tutor.{% endblock %}">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
+
+  {% include 'partials/_navbar.html' %}
+
+  <main id="main-content">
+    {% include 'partials/_flash_messages.html' %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
