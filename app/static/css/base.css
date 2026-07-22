@@ -130,6 +130,15 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 }
 .btn-ai:hover { background-color: var(--color-ai-purple); color: white; }
 
+.btn:disabled,
+.btn[disabled] {
+  background-color: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 /* Forms */
 .form-group { margin-bottom: var(--space-2); }
 .form-label {
@@ -378,3 +387,63 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 }
 
 .review-complete { margin-top: var(--space-5); }
+
+/* Stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.stat-tile {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  color: var(--color-primary);
+  margin: var(--space-1) 0 0 0;
+}
+.stat-unit { font-family: var(--font-body); font-size: var(--text-small); color: var(--color-text-muted); }
+.stat-sub { font-size: var(--text-caption); margin-top: var(--space-1); }
+
+/* Timer */
+.timer-card { max-width: 480px; margin: 0 auto; text-align: center; padding: var(--space-5); }
+.timer-display {
+  font-family: var(--font-display);
+  font-size: 64px;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+}
+.duration-options {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+.duration-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.duration-btn:hover { background-color: var(--color-primary-light); }
+.duration-btn--active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+.duration-custom input { width: 100px; text-align: center; }
+.timer-subject { max-width: 280px; margin: 0 auto var(--space-3); text-align: left; }
+.timer-controls { display: flex; gap: var(--space-2); justify-content: center; }
+.timer-status { margin-top: var(--space-3); min-height: 20px; }

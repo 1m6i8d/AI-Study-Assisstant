@@ -78,9 +78,11 @@ def _register_blueprints(app):
     from app.subjects.routes import subjects_bp
     from app.notes.routes import notes_bp
     from app.flashcards.routes import flashcards_bp
+    from app.study.routes import study_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(subjects_bp, url_prefix="/subjects")
     app.register_blueprint(notes_bp, url_prefix="/notes")
     app.register_blueprint(flashcards_bp, url_prefix="/flashcards")
+    app.register_blueprint(study_bp, url_prefix="/study")

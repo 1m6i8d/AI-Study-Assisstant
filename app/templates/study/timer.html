@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Study Timer · Study Assistant{% endblock %}
+{% block content %}
+<div class="container study-page">
+  <div class="page-header">
+    <h1>Study Timer</h1>
+    <a href="{{ url_for('study.goals') }}" class="btn btn-secondary btn-sm">Edit goals</a>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-tile">
+      <span class="label-accent">Today</span>
+      <p class="stat-value">{{ stats.today_minutes }} <span class="stat-unit">min</span></p>
+      <p class="text-muted stat-sub">Goal: {{ daily_goal }} min</p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">This week</span>
+      <p class="stat-value">{{ stats.weekly_hours }} <span class="stat-unit">hrs</span></p>
+      <p class="text-muted stat-sub">Goal: {{ (weekly_goal / 60) | round(1) }} hrs</p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">This month</span>
+      <p class="stat-value">{{ stats.monthly_hours }} <span class="stat-unit">hrs</span></p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">Streak</span>
+      <p class="stat-value">{{ stats.streak }} <span class="stat-unit">day{{ 's' if stats.streak != 1 else '' }}</span></p>
+    </div>
+  </div>
+
+  <div class="timer-card card">
+    <div class="timer-display" id="timer-display" aria-live="polite">25:00</div>
+
+    <div class="timer-setup" id="timer-setup">
+      <div class="duration-options">
+        {% for preset in presets %}
+          <button type="button" class="duration-btn" data-minutes="{{ preset }}">{{ preset }} min</button>
+        {% endfor %}
+        <div class="duration-custom">
+          <input type="number" id="custom-minutes" min="1" max="{{ max_custom }}" placeholder="Custom" class="form-control">
+        </div>
+      </div>
+
+      {% if subjects %}
+        <div class="form-group timer-subject">
+          <label for="subject-select" class="form-label">Subject (optional)</label>
+          <select id="subject-select" class="form-control">
+            <option value="">No subject</option>
+            {% for id, name in subjects %}
+              <option value="{{ id }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+
+      <button type="button" id="start-btn" class="btn btn-primary" disabled>Start session</button>
+    </div>
+
+    <div class="timer-controls" id="timer-controls" hidden>
+      <button type="button" id="pause-btn" class="btn btn-secondary">Pause</button>
+      <button type="button" id="cancel-btn" class="btn btn-ghost">Cancel</button>
+    </div>
+
+    <p class="timer-status text-muted" id="timer-status"></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+  const display = document.getElementById("timer-display");
+  const setupEl = document.getElementById("timer-setup");
+  const controlsEl = document.getElementById("timer-controls");
+  const startBtn = document.getElementById("start-btn");
+  const pauseBtn = document.getElementById("pause-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const statusEl = document.getElementById("timer-status");
+  const customInput = document.getElementById("custom-minutes");
+  const subjectSelect = document.getElementById("subject-select");
+  const csrfToken = "{{ csrf_token() }}";
+
+  let selectedMinutes = null;
+  let remainingSeconds = 0;
+  let intervalId = null;
+  let paused = false;
+  let sessionId = null;
+
+  document.querySelectorAll(".duration-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".duration-btn").forEach((b) => b.classList.remove("duration-btn--active"));
+      btn.classList.add("duration-btn--active");
+      selectedMinutes = parseInt(btn.dataset.minutes, 10);
+      customInput.value = "";
+      updateDisplay(selectedMinutes * 60);
+      startBtn.disabled = false;
+    });
+  });
+
+  customInput.addEventListener("input", () => {
+    const val = parseInt(customInput.value, 10);
+    document.querySelectorAll(".duration-btn").forEach((b) => b.classList.remove("duration-btn--active"));
+    if (val > 0) {
+      selectedMinutes = val;
+      updateDisplay(val * 60);
+      startBtn.disabled = false;
+    } else {
+      startBtn.disabled = true;
+    }
+  });
+
+  function updateDisplay(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    display.textContent = `${m}:${s}`;
+  }
+
+  async function startTimer() {
+    const subjectId = subjectSelect && subjectSelect.value ? parseInt(subjectSelect.value, 10) : null;
+
+    statusEl.textContent = "Starting...";
+    try {
+      const res = await fetch("/study/sessions/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify({ planned_minutes: selectedMinutes, subject_id: subjectId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        statusEl.textContent = data.error || "Could not start session.";
+        return;
+      }
+      sessionId = data.session_id;
+    } catch (err) {
+      statusEl.textContent = "Network error — could not start session.";
+      return;
+    }
+
+    remainingSeconds = selectedMinutes * 60;
+    setupEl.hidden = true;
+    controlsEl.hidden = false;
+    statusEl.textContent = "Session in progress.";
+    paused = false;
+    tick();
+  }
+
+  function tick() {
+    intervalId = setInterval(() => {
+      if (paused) return;
+      remainingSeconds -= 1;
+      updateDisplay(Math.max(remainingSeconds, 0));
+      if (remainingSeconds <= 0) {
+        clearInterval(intervalId);
+        finishTimer();
+      }
+    }, 1000);
+  }
+
+  async function finishTimer() {
+    statusEl.textContent = "Saving session...";
+    try {
+      const res = await fetch(`/study/sessions/${sessionId}/complete`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        statusEl.textContent = "Session complete. Nice work.";
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        statusEl.textContent = data.error || "Could not save session.";
+      }
+    } catch (err) {
+      statusEl.textContent = "Network error — session may not have saved.";
+    }
+  }
+
+  pauseBtn.addEventListener("click", () => {
+    paused = !paused;
+    pauseBtn.textContent = paused ? "Resume" : "Pause";
+    statusEl.textContent = paused ? "Paused." : "Session in progress.";
+  });
+
+  cancelBtn.addEventListener("click", async () => {
+    clearInterval(intervalId);
+    try {
+      await fetch(`/study/sessions/${sessionId}/cancel`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+      });
+    } catch (err) {
+      console.error("Failed to cancel session:", err);
+    }
+    window.location.reload();
+  });
+
+  startBtn.addEventListener("click", startTimer);
+})();
+</script>
+{% endblock %}
