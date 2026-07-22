@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Flashcards · Study Assistant{% endblock %}
+{% block content %}
+<div class="container flashcards-page">
+  <div class="page-header">
+    <h1>Flashcards</h1>
+    <a href="{{ url_for('flashcards.create_flashcard') }}" class="btn btn-primary">New flashcard</a>
+  </div>
+
+  <form method="GET" class="filter-bar" role="search">
+    <select name="subject_id" class="form-control" aria-label="Filter by subject">
+      <option value="">All subjects</option>
+      {% for id, name in subjects %}
+        <option value="{{ id }}" {% if selected_subject_id == id %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+    <select name="difficulty" class="form-control" aria-label="Filter by difficulty">
+      <option value="">All difficulties</option>
+      {% for level in difficulty_levels %}
+        <option value="{{ level }}" {% if selected_difficulty == level %}selected{% endif %}>{{ level.capitalize() }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Apply</button>
+  </form>
+
+  {% if cards %}
+    <div class="flashcard-grid">
+      {% for card in cards %}
+        <div class="flashcard-tile">
+          <p class="flashcard-front">{{ card.front }}</p>
+          <div class="flashcard-meta">
+            {% if card.difficulty %}
+              <span class="tag-chip tag-chip--{{ card.difficulty }}">{{ card.difficulty }}</span>
+            {% else %}
+              <span class="tag-chip tag-chip--new">Not reviewed</span>
+            {% endif %}
+            <span class="text-muted">{{ card.review_count }} review{{ 's' if card.review_count != 1 else '' }}</span>
+          </div>
+          <div class="flashcard-actions">
+            <a href="{{ url_for('flashcards.edit_flashcard', flashcard_id=card.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+            <form method="POST" action="{{ url_for('flashcards.delete_flashcard', flashcard_id=card.id) }}"
+                  onsubmit="return confirm('Delete this flashcard?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-sm">Delete</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No flashcards yet</h3>
+      <p class="text-muted">Create flashcards to start reviewing what you've learned.</p>
+      <a href="{{ url_for('flashcards.create_flashcard') }}" class="btn btn-primary">Create a flashcard</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

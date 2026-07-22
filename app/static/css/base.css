@@ -308,3 +308,73 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+/* Flashcard grid (list view) */
+.flashcard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+.flashcard-tile {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+.flashcard-front {
+  font-size: var(--text-body-lg);
+  margin-bottom: var(--space-2);
+  min-height: 48px;
+}
+.flashcard-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-caption);
+  margin-bottom: var(--space-2);
+}
+.flashcard-actions { display: flex; gap: var(--space-1); }
+
+.tag-chip--easy   { background-color: var(--color-success-light); color: var(--color-success); }
+.tag-chip--medium { background-color: var(--color-warning-light); color: var(--color-warning); }
+.tag-chip--hard   { background-color: var(--color-danger-light); color: var(--color-danger); }
+.tag-chip--new    { background-color: var(--color-bg-secondary); color: var(--color-text-muted); }
+
+/* Review mode */
+.review-page { max-width: 640px; margin: var(--space-6) auto; text-align: center; }
+.review-header { margin-bottom: var(--space-4); }
+
+.review-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  cursor: pointer;
+  margin-bottom: var(--space-3);
+}
+.review-card:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+.review-card-face {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: var(--leading-normal);
+}
+.review-card-back { color: var(--color-primary); }
+
+.review-hint { margin-bottom: var(--space-3); }
+
+.review-rating-buttons {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.review-complete { margin-top: var(--space-5); }

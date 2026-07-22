@@ -51,9 +51,24 @@
     </div>
   {% endif %}
 
+  <div class="section-header">
+    <h2>Flashcards</h2>
+    <div>
+      {% if subject.flashcards.count() > 0 %}
+        <a href="{{ url_for('flashcards.review', subject_id=subject.id) }}" class="btn btn-primary btn-sm">Review</a>
+      {% endif %}
+      <a href="{{ url_for('flashcards.create_flashcard', subject_id=subject.id) }}" class="btn btn-secondary btn-sm">New flashcard</a>
+    </div>
+  </div>
+  {% if subject.flashcards.count() > 0 %}
+    <p class="text-muted">{{ subject.flashcards.count() }} flashcard{{ 's' if subject.flashcards.count() != 1 else '' }} in this subject.</p>
+  {% else %}
+    <p class="text-muted">No flashcards yet.</p>
+  {% endif %}
+
   <div class="empty-state">
-    <h3>Flashcards and quizzes coming soon</h3>
-    <p class="text-muted">These sections will appear here as those modules are built.</p>
+    <h3>Quizzes coming soon</h3>
+    <p class="text-muted">This section will appear here once the Quizzes module is built.</p>
   </div>
 </div>
 {% endblock %}

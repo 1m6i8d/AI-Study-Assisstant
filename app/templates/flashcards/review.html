@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Review: {{ subject.name }} · Study Assistant{% endblock %}
+{% block content %}
+<div class="container review-page">
+  <div class="review-header">
+    <h1>Reviewing {{ subject.name }}</h1>
+    <p class="text-muted"><span id="review-position">1</span> of {{ cards|length }}</p>
+  </div>
+
+  <div class="review-card" id="review-card" tabindex="0" role="button"
+       aria-label="Flashcard, press Enter or click to flip"
+       data-cards='{{ cards | map(attribute="id") | list | tojson }}'>
+    <div class="review-card-inner" id="review-card-inner">
+      <div class="review-card-face review-card-front" id="card-front"></div>
+      <div class="review-card-face review-card-back" id="card-back" hidden></div>
+    </div>
+  </div>
+
+  <p class="review-hint text-muted" id="review-hint">Click the card or press Space to reveal the answer.</p>
+
+  <div class="review-rating" id="review-rating" hidden>
+    <p class="text-muted">How well did you know this?</p>
+    <div class="review-rating-buttons">
+      <button type="button" class="btn btn-danger" data-difficulty="hard">Hard</button>
+      <button type="button" class="btn btn-secondary" data-difficulty="medium">Medium</button>
+      <button type="button" class="btn btn-primary" data-difficulty="easy">Easy</button>
+    </div>
+  </div>
+
+  <div class="review-complete empty-state" id="review-complete" hidden>
+    <h3>Review complete</h3>
+    <p class="text-muted">You've gone through every card in this subject.</p>
+    <a href="{{ url_for('subjects.view_subject', subject_id=subject.id) }}" class="btn btn-primary">Back to subject</a>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  const cardsData = {{ cards_json | safe }};
+  const csrfToken = "{{ csrf_token() }}";
+  let currentIndex = 0;
+  let revealed = false;
+
+  const cardEl = document.getElementById("review-card");
+  const frontEl = document.getElementById("card-front");
+  const backEl = document.getElementById("card-back");
+  const hintEl = document.getElementById("review-hint");
+  const ratingEl = document.getElementById("review-rating");
+  const positionEl = document.getElementById("review-position");
+  const completeEl = document.getElementById("review-complete");
+
+  function showCard(index) {
+    const card = cardsData[index];
+    frontEl.textContent = card.front;
+    backEl.textContent = card.back;
+    backEl.hidden = true;
+    ratingEl.hidden = true;
+    hintEl.hidden = false;
+    revealed = false;
+    positionEl.textContent = index + 1;
+  }
+
+  function reveal() {
+    if (revealed) return;
+    backEl.hidden = false;
+    hintEl.hidden = true;
+    ratingEl.hidden = false;
+    revealed = true;
+  }
+
+  async function rate(difficulty) {
+    const card = cardsData[currentIndex];
+    try {
+      await fetch(`/flashcards/${card.id}/rate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify({ difficulty }),
+      });
+    } catch (err) {
+      console.error("Failed to save review:", err);
+    }
+
+    currentIndex += 1;
+    if (currentIndex >= cardsData.length) {
+      document.querySelector(".review-card").hidden = true;
+      hintEl.hidden = true;
+      ratingEl.hidden = true;
+      document.querySelector(".review-header").hidden = true;
+      completeEl.hidden = false;
+    } else {
+      showCard(currentIndex);
+    }
+  }
+
+  cardEl.addEventListener("click", reveal);
+  cardEl.addEventListener("keydown", (e) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      reveal();
+    }
+  });
+
+  document.querySelectorAll("[data-difficulty]").forEach((btn) => {
+    btn.addEventListener("click", () => rate(btn.dataset.difficulty));
+  });
+
+  showCard(0);
+</script>
+{% endblock %}
+{% endblock %}

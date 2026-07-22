@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if mode == "edit" else "New" }} flashcard · Study Assistant{% endblock %}
+{% block content %}
+<div class="container form-page">
+  <h1>{{ "Edit flashcard" if mode == "edit" else "New flashcard" }}</h1>
+
+  <form method="POST" novalidate class="card">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.subject_id.label(class="form-label") }}
+      {{ form.subject_id(class="form-control" + (" is-invalid" if form.subject_id.errors else "")) }}
+      {% for error in form.subject_id.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.front.label(class="form-label") }}
+      {{ form.front(class="form-control" + (" is-invalid" if form.front.errors else ""), autofocus=true) }}
+      <span class="form-hint">{{ form.front.description }}</span>
+      {% for error in form.front.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.back.label(class="form-label") }}
+      {{ form.back(class="form-control" + (" is-invalid" if form.back.errors else ""), rows=4) }}
+      <span class="form-hint">{{ form.back.description }}</span>
+      {% for error in form.back.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit(class="btn btn-primary") }}
+      <a href="{{ url_for('flashcards.list_flashcards') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
