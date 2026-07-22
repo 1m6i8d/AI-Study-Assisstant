@@ -19,6 +19,12 @@ h2 { font-size: var(--text-h2); margin-bottom: var(--space-2); }
 h3 { font-size: var(--text-h3); margin-bottom: var(--space-2); }
 h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 
+.brand-wordmark {
+  font-family: var(--font-accent);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
 .text-muted { color: var(--color-text-muted) !important; font-family: var(--font-body); }
 .text-secondary { color: var(--color-text-secondary); }
 
@@ -42,6 +48,10 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   font-weight: 400;
   font-size: 22px;
   color: var(--color-text-primary);
+}
+.app-navbar .navbar-brand.brand-wordmark {
+  font-family: var(--font-accent);
+  letter-spacing: 0.03em;
 }
 .app-navbar .nav-link {
   font-family: var(--font-body);
