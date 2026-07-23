@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if mode == "edit" else "New" }} timetable entry · NOTABL{% endblock %}
+{% block content %}
+<div class="container form-page">
+  <h1>{{ "Edit entry" if mode == "edit" else "New timetable entry" }}</h1>
+
+  <form method="POST" novalidate class="card">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.title.label(class="form-label") }}
+      {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), autofocus=true) }}
+      {% for error in form.title.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.subject_id.label(class="form-label") }}
+      {{ form.subject_id(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.entry_type.label(class="form-label") }}
+      {{ form.entry_type(class="form-control", id="entry-type-select") }}
+    </div>
+
+    <div class="form-group" id="day-of-week-group">
+      {{ form.day_of_week.label(class="form-label") }}
+      {{ form.day_of_week(class="form-control" + (" is-invalid" if form.day_of_week.errors else "")) }}
+      {% for error in form.day_of_week.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="form-group" id="specific-date-group">
+      {{ form.specific_date.label(class="form-label") }}
+      {{ form.specific_date(class="form-control" + (" is-invalid" if form.specific_date.errors else "")) }}
+      {% for error in form.specific_date.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.start_time.label(class="form-label") }}
+      {{ form.start_time(class="form-control" + (" is-invalid" if form.start_time.errors else "")) }}
+      {% for error in form.start_time.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.end_time.label(class="form-label") }}
+      {{ form.end_time(class="form-control" + (" is-invalid" if form.end_time.errors else "")) }}
+      {% for error in form.end_time.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit(class="btn btn-primary") }}
+      <a href="{{ url_for('timetable.grid') }}" class="btn btn-secondary">Cancel</a>
+      {% if mode == "edit" %}
+        <form method="POST" action="{{ url_for('timetable.delete_entry', entry_id=entry.id) }}"
+              onsubmit="return confirm('Delete this entry?');" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{% block extra_js %}
+<script>
+  const typeSelect = document.getElementById("entry-type-select");
+  const dayGroup = document.getElementById("day-of-week-group");
+  const dateGroup = document.getElementById("specific-date-group");
+
+  function toggleFields() {
+    if (typeSelect.value === "recurring") {
+      dayGroup.style.display = "block";
+      dateGroup.style.display = "none";
+    } else {
+      dayGroup.style.display = "none";
+      dateGroup.style.display = "block";
+    }
+  }
+
+  typeSelect.addEventListener("change", toggleFields);
+  toggleFields();
+</script>
+{% endblock %}
+{% endblock %}

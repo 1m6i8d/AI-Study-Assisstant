@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}AI Tutor · NOTABL{% endblock %}
+{% block content %}
+<div class="container tutor-index-page">
+  <div class="page-header">
+    <h1>AI Tutor</h1>
+    <a href="{{ url_for('tutor.new_conversation') }}" class="btn btn-ai">New conversation</a>
+  </div>
+
+  {% if conversations %}
+    <div class="quiz-list">
+      {% for msg in conversations %}
+        <a href="{{ url_for('tutor.conversation', conversation_id=msg.conversation_id) }}" class="quiz-row">
+          <div>
+            <h3>{{ msg.content[:60] }}{{ "..." if msg.content|length > 60 else "" }}</h3>
+            <p class="text-muted">{{ msg.created_at.strftime('%b %d, %Y at %I:%M %p') }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No conversations yet</h3>
+      <p class="text-muted">Start a conversation to get help with concepts, notes, or study planning.</p>
+      <a href="{{ url_for('tutor.new_conversation') }}" class="btn btn-ai">Start a conversation</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

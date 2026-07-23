@@ -3,20 +3,7 @@ import json
 import os
 import re
 
-from groq import Groq
-
-_client = None
-
-
-def _get_client():
-    global _client
-    if _client is None:
-        api_key = os.environ.get("GROQ_API_KEY")
-        if not api_key:
-            raise RuntimeError("GROQ_API_KEY is not set.")
-        _client = Groq(api_key=api_key)
-    return _client
-
+from app.ai.client import get_client, get_model
 
 SYSTEM_PROMPT = """You are a quiz generator. Given study notes, generate quiz questions.
 
@@ -62,8 +49,8 @@ def generate_quiz(source_content, question_types, question_count):
         f"STUDY NOTES:\n{source_content[:8000]}"  # cap input to stay within reasonable token usage
     )
 
-    client = _get_client()
-    model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+    client = get_client()
+    model = get_model()
 
     try:
         response = client.chat.completions.create(

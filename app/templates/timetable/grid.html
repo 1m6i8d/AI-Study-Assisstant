@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Timetable · NOTABL{% endblock %}
+{% block content %}
+<div class="container timetable-page">
+  <div class="page-header">
+    <h1>Timetable</h1>
+    <a href="{{ url_for('timetable.create_entry') }}" class="btn btn-primary">New entry</a>
+  </div>
+
+  <div class="timetable-nav">
+    <a href="{{ url_for('timetable.grid', week=prev_week) }}" class="btn btn-secondary btn-sm">← Previous week</a>
+    <span class="label-accent">{{ week_start.strftime('%b %d') }} – {{ (days[-1].date).strftime('%b %d, %Y') }}</span>
+    <a href="{{ url_for('timetable.grid', week=next_week) }}" class="btn btn-secondary btn-sm">Next week →</a>
+  </div>
+
+  <div class="timetable-grid-wrapper">
+    <div class="timetable-grid">
+      <div class="timetable-hours-col">
+        <div class="timetable-day-header"></div>
+        {% for hour in hours %}
+          <div class="timetable-hour-label">{{ "%02d:00"|format(hour) }}</div>
+        {% endfor %}
+      </div>
+
+      {% for day in days %}
+        <div class="timetable-day-col {{ 'timetable-day-col--today' if day.date == today else '' }}">
+          <div class="timetable-day-header">
+            <span>{{ day.date.strftime('%a') }}</span>
+            <span class="text-muted">{{ day.date.strftime('%d') }}</span>
+          </div>
+          <div class="timetable-day-body" style="height: {{ (hours|length) * 60 }}px;">
+            {% for item in day.entries %}
+              <a href="{{ url_for('timetable.edit_entry', entry_id=item.entry.id) }}"
+                 class="timetable-entry {{ 'timetable-entry--conflict' if item.conflict else '' }}"
+                 style="top: {{ item.top }}px; height: {{ item.height }}px;">
+                <span class="timetable-entry-title">{{ item.entry.title }}</span>
+                <span class="timetable-entry-time">{{ item.entry.start_time.strftime('%I:%M %p') }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
