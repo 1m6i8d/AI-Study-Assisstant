@@ -23,7 +23,11 @@
     {% for msg in messages %}
       <div class="chat-message chat-message--{{ msg.role }}">
         <span class="label-accent">{{ "You" if msg.role == "user" else "Tutor" }}</span>
-        <p>{{ msg.content }}</p>
+        {% if msg.role == "assistant" %}
+          <p class="markdown-content" data-markdown-render data-markdown-source="{{ msg.content | e }}"></p>
+        {% else %}
+          <p>{{ msg.content }}</p>
+        {% endif %}
       </div>
     {% endfor %}
   </div>
@@ -53,7 +57,12 @@
     label.className = "label-accent";
     label.textContent = role === "user" ? "You" : "Tutor";
     const p = document.createElement("p");
-    p.textContent = content;
+    if (role === "assistant") {
+      p.className = "markdown-content";
+      p.innerHTML = renderMarkdownSafely(content);
+    } else {
+      p.textContent = content;
+    }
     div.appendChild(label);
     div.appendChild(p);
     chatWindow.appendChild(div);

@@ -26,9 +26,6 @@
       </form>
     </div>
   </div>
-
-  <div class="card note-content">
-    {{ note.content }}
-  </div>
+  <div class="card note-content markdown-content" data-markdown-render data-markdown-source="{{ note.content | e }}"></div>
 </div>
 {% endblock %}

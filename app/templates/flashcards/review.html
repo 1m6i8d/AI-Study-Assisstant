@@ -51,8 +51,8 @@
 
   function showCard(index) {
     const card = cardsData[index];
-    frontEl.textContent = card.front;
-    backEl.textContent = card.back;
+    frontEl.innerHTML = renderMarkdownSafely(card.front);
+    backEl.innerHTML = renderMarkdownSafely(card.back);
     backEl.hidden = true;
     ratingEl.hidden = true;
     hintEl.hidden = false;

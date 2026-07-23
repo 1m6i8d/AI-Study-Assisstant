@@ -6,7 +6,7 @@
     <div>
       <h1>{{ subject.name }}</h1>
       {% if subject.description %}
-        <p class="text-muted">{{ subject.description }}</p>
+        <div class="text-muted markdown-content" data-markdown-render data-markdown-source="{{ subject.description | e }}"></div>
       {% endif %}
     </div>
     <div class="page-header-actions">

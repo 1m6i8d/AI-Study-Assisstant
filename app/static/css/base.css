@@ -598,3 +598,68 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 }
 .timetable-entry-title { display: block; font-weight: 600; }
 .timetable-entry-time { display: block; color: var(--color-text-muted); }
+
+/* Markdown editor */
+.md-editor-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.md-editor-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+.md-tab {
+  background: none;
+  border: none;
+  padding: 4px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.md-tab--active {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+.md-editor-hint {
+  margin-left: auto;
+  font-size: var(--text-caption);
+}
+.md-editor-wrapper textarea {
+  border: none;
+  border-radius: 0;
+  width: 100%;
+}
+.md-editor-wrapper textarea:focus { box-shadow: none; }
+.md-preview {
+  padding: var(--space-2);
+  min-height: 100px;
+}
+.md-preview :first-child { margin-top: 0; }
+
+/* Rendered markdown content — used in note detail, tutor replies */
+.markdown-content code {
+  background-color: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9em;
+}
+.markdown-content pre {
+  background-color: var(--color-bg-secondary);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+.markdown-content pre code { background: none; padding: 0; }
+.markdown-content ul, .markdown-content ol { padding-left: var(--space-3); }
+.markdown-content blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: var(--space-2);
+  color: var(--color-text-secondary);
+}
