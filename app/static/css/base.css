@@ -506,6 +506,16 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 .quiz-answer-line { margin-bottom: var(--space-1); }
 .quiz-explanation { margin-top: var(--space-2); }
 
+.quiz-flag-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+.tag-chip--flagged { background-color: var(--color-warning-light); color: var(--color-warning); }
+
 /* AI Tutor */
 .tutor-chat-page { max-width: 720px; margin: var(--space-5) auto var(--space-6); }
 .tutor-note-attach { max-width: 320px; margin-bottom: var(--space-3); }

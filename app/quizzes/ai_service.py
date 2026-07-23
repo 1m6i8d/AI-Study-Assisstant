@@ -94,3 +94,32 @@ def generate_quiz(source_content, question_types, question_count):
         raise ValueError("AI response contained no valid questions after validation.")
 
     return validated
+
+def judge_short_answer(question_text, correct_answer, user_answer):
+    """Ask Groq whether a short-answer response is semantically correct.
+    Returns True/False. Falls back to exact match if the AI call fails."""
+    if not user_answer:
+        return False
+
+    client = get_client()
+    model = get_model()
+
+    prompt = (
+        f"Question: {question_text}\n"
+        f"Expected answer: {correct_answer}\n"
+        f"Student's answer: {user_answer}\n\n"
+        f"Is the student's answer substantively correct, even if worded differently? "
+        f"Respond with ONLY the single word 'true' or 'false'."
+    )
+
+    try:
+        response = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model=model,
+            temperature=0,
+        )
+        result = response.choices[0].message.content.strip().lower()
+        return result.startswith("true")
+    except Exception:
+        # Fallback: exact match, rather than crashing the submission
+        return user_answer.strip().lower() == correct_answer.strip().lower()

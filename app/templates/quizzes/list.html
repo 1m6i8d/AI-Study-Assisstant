@@ -19,13 +19,14 @@
   {% if quizzes %}
     <div class="quiz-list">
       {% for quiz in quizzes %}
-        <a href="{{ url_for('quizzes.results' if quiz.completed_at else 'quizzes.take_quiz', quiz_id=quiz.id) }}" class="quiz-row">
+        {% set latest = quiz.latest_attempt() %}
+        <a href="{{ url_for('quizzes.detail', quiz_id=quiz.id) }}" class="quiz-row">
           <div>
             <h3>{{ quiz.title }}</h3>
-            <p class="text-muted">{{ quiz.total_questions }} questions · {{ quiz.created_at.strftime('%b %d, %Y') }}</p>
+            <p class="text-muted">{{ quiz.total_questions }} questions · {{ quiz.attempts.count() }} attempt{{ 's' if quiz.attempts.count() != 1 else '' }}</p>
           </div>
-          {% if quiz.completed_at %}
-            <span class="quiz-score">{{ quiz.score }}/{{ quiz.total_questions }}</span>
+          {% if latest and latest.completed_at %}
+            <span class="quiz-score">{{ latest.score }}/{{ quiz.total_questions }}</span>
           {% else %}
             <span class="tag-chip tag-chip--new">Not started</span>
           {% endif %}

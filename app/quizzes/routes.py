@@ -1,13 +1,13 @@
-"""Quiz generation, taking, and results routes."""
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-
+"""Quiz generation, attempts, results, and flagging routes."""
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 
 from app.extensions import limiter
 from app.quizzes.forms import QuizGenerateForm
 from app.quizzes.ai_service import generate_quiz
 from app.quizzes.services import (
-    get_subject_notes_content, create_quiz, get_user_quizzes, get_quiz_or_404, submit_quiz_answers
+    get_subject_notes_content, create_quiz, get_user_quizzes, get_quiz_or_404,
+    start_attempt, submit_attempt, get_attempt_or_404, toggle_flag,
 )
 from app.notes.services import get_subject_choices
 from app.subjects.services import get_subject_or_404
@@ -26,10 +26,9 @@ def list_quizzes():
 
 @quizzes_bp.route("/new", methods=["GET", "POST"])
 @login_required
-@limiter.limit("10 per hour")  # separate, tighter limit — this route costs real API quota
+@limiter.limit("10 per hour")
 def generate():
     preselected_subject_id = request.args.get("subject_id", type=int)
-
     form = QuizGenerateForm()
     form.subject_id.choices = get_subject_choices(current_user.id)
 
@@ -49,47 +48,70 @@ def generate():
             return render_template("quizzes/form.html", form=form)
 
         try:
-            questions_data = generate_quiz(
-                content, form.question_types.data, form.question_count.data
-            )
+            questions_data = generate_quiz(content, form.question_types.data, form.question_count.data)
         except ValueError as exc:
             flash(f"Quiz generation failed: {exc}", "error")
             return render_template("quizzes/form.html", form=form)
 
         quiz = create_quiz(subject.id, f"{subject.name} Quiz", questions_data)
-        flash("Quiz generated.", "success")
-        return redirect(url_for("quizzes.take_quiz", quiz_id=quiz.id))
+        flash("Quiz generated. Ready to take it.", "success")
+        return redirect(url_for("quizzes.detail", quiz_id=quiz.id))
 
     return render_template("quizzes/form.html", form=form)
 
 
 @quizzes_bp.route("/<int:quiz_id>")
 @login_required
-def take_quiz(quiz_id):
+def detail(quiz_id):
     quiz = get_quiz_or_404(quiz_id, current_user.id)
-    if quiz.completed_at:
-        return redirect(url_for("quizzes.results", quiz_id=quiz.id))
-    return render_template("quizzes/take.html", quiz=quiz)
+    attempts = quiz.attempts.all()
+    return render_template("quizzes/detail.html", quiz=quiz, attempts=attempts)
 
 
-@quizzes_bp.route("/<int:quiz_id>/submit", methods=["POST"])
+@quizzes_bp.route("/<int:quiz_id>/start", methods=["POST"])
 @login_required
-def submit(quiz_id):
-    quiz = get_quiz_or_404(quiz_id, current_user.id)
+def start(quiz_id):
+    get_quiz_or_404(quiz_id, current_user.id)  # ownership check
+    attempt = start_attempt(quiz_id, current_user.id)
+    return redirect(url_for("quizzes.take_attempt", attempt_id=attempt.id))
+
+
+@quizzes_bp.route("/attempt/<int:attempt_id>")
+@login_required
+def take_attempt(attempt_id):
+    attempt = get_attempt_or_404(attempt_id, current_user.id)
+    if attempt.completed_at:
+        return redirect(url_for("quizzes.results", attempt_id=attempt.id))
+    return render_template("quizzes/take.html", attempt=attempt, quiz=attempt.quiz)
+
+
+@quizzes_bp.route("/attempt/<int:attempt_id>/submit", methods=["POST"])
+@login_required
+def submit(attempt_id):
+    get_attempt_or_404(attempt_id, current_user.id)
     answers = {
         key.replace("question_", ""): value
         for key, value in request.form.items()
         if key.startswith("question_")
     }
-    submit_quiz_answers(quiz_id, current_user.id, answers)
+    submit_attempt(attempt_id, current_user.id, answers)
     flash("Quiz submitted.", "success")
-    return redirect(url_for("quizzes.results", quiz_id=quiz.id))
+    return redirect(url_for("quizzes.results", attempt_id=attempt_id))
 
 
-@quizzes_bp.route("/<int:quiz_id>/results")
+@quizzes_bp.route("/attempt/<int:attempt_id>/results")
 @login_required
-def results(quiz_id):
-    quiz = get_quiz_or_404(quiz_id, current_user.id)
-    if not quiz.completed_at:
-        return redirect(url_for("quizzes.take_quiz", quiz_id=quiz.id))
-    return render_template("quizzes/results.html", quiz=quiz)
+def results(attempt_id):
+    attempt = get_attempt_or_404(attempt_id, current_user.id)
+    if not attempt.completed_at:
+        return redirect(url_for("quizzes.take_attempt", attempt_id=attempt.id))
+    return render_template("quizzes/results.html", attempt=attempt, quiz=attempt.quiz)
+
+
+@quizzes_bp.route("/answer/<int:answer_id>/flag", methods=["POST"])
+@login_required
+def flag(answer_id):
+    data = request.get_json(silent=True) or {}
+    override = data.get("override")  # true, false, or null (flag without override)
+    answer = toggle_flag(answer_id, current_user.id, override=override)
+    return jsonify({"flagged": answer.flagged, "final_correctness": answer.final_correctness()})

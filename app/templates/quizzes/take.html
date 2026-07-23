@@ -4,7 +4,7 @@
 <div class="container quiz-take-page">
   <h1>{{ quiz.title }}</h1>
 
-  <form method="POST" action="{{ url_for('quizzes.submit', quiz_id=quiz.id) }}">
+  <form method="POST" action="{{ url_for('quizzes.submit', attempt_id=attempt.id) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     {% for question in quiz.questions %}

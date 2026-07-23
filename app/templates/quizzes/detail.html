@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.title }} · NOTABL{% endblock %}
+{% block content %}
+<div class="container quiz-detail-page">
+  <div class="page-header">
+    <div>
+      <h1>{{ quiz.title }}</h1>
+      <p class="text-muted">{{ quiz.total_questions }} questions</p>
+    </div>
+    <form method="POST" action="{{ url_for('quizzes.start', quiz_id=quiz.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-ai">{{ "Retake quiz" if attempts else "Take quiz" }}</button>
+    </form>
+  </div>
+
+  {% if attempts %}
+    <h2>Attempt history</h2>
+    <p class="text-muted">Only the last {{ 3 }} attempts are kept — older ones are removed automatically.</p>
+    <div class="quiz-list">
+      {% for attempt in attempts %}
+        <a href="{{ url_for('quizzes.results' if attempt.completed_at else 'quizzes.take_attempt', attempt_id=attempt.id) }}" class="quiz-row">
+          <div>
+            <h3>{{ attempt.created_at.strftime('%b %d, %Y at %I:%M %p') }}</h3>
+          </div>
+          {% if attempt.completed_at %}
+            <span class="quiz-score">{{ attempt.score }}/{{ quiz.total_questions }}</span>
+          {% else %}
+            <span class="tag-chip tag-chip--new">In progress</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>Not attempted yet</h3>
+      <p class="text-muted">Take the quiz to see your score here.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
