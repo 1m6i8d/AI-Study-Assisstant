@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Quizzes · NOTABL{% endblock %}
+{% block content %}
+<div class="container quizzes-page">
+  <div class="page-header">
+    <h1>Quizzes</h1>
+    <a href="{{ url_for('quizzes.generate') }}" class="btn btn-ai">Generate quiz</a>
+  </div>
+
+  <form method="GET" class="filter-bar">
+    <select name="subject_id" class="form-control" onchange="this.form.submit()">
+      <option value="">All subjects</option>
+      {% for id, name in subjects %}
+        <option value="{{ id }}" {% if selected_subject_id == id %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if quizzes %}
+    <div class="quiz-list">
+      {% for quiz in quizzes %}
+        <a href="{{ url_for('quizzes.results' if quiz.completed_at else 'quizzes.take_quiz', quiz_id=quiz.id) }}" class="quiz-row">
+          <div>
+            <h3>{{ quiz.title }}</h3>
+            <p class="text-muted">{{ quiz.total_questions }} questions · {{ quiz.created_at.strftime('%b %d, %Y') }}</p>
+          </div>
+          {% if quiz.completed_at %}
+            <span class="quiz-score">{{ quiz.score }}/{{ quiz.total_questions }}</span>
+          {% else %}
+            <span class="tag-chip tag-chip--new">Not started</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No quizzes yet</h3>
+      <p class="text-muted">Generate a quiz from your notes to test what you've learned.</p>
+      <a href="{{ url_for('quizzes.generate') }}" class="btn btn-ai">Generate a quiz</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

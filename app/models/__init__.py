@@ -4,5 +4,6 @@ from app.models.subject import Subject
 from app.models.note import Note
 from app.models.flashcard import Flashcard
 from app.models.study_session import StudySession
+from app.models.quiz import Quiz, QuizQuestion
 
-__all__ = ["User", "Subject", "Note", "Flashcard", "StudySession"]
+__all__ = ["User", "Subject", "Note", "Flashcard", "StudySession", "Quiz", "QuizQuestion"]

@@ -66,9 +66,14 @@
     <p class="text-muted">No flashcards yet.</p>
   {% endif %}
 
-  <div class="empty-state">
-    <h3>Quizzes coming soon</h3>
-    <p class="text-muted">This section will appear here once the Quizzes module is built.</p>
+  <div class="section-header">
+    <h2>Quizzes</h2>
+    <a href="{{ url_for('quizzes.generate', subject_id=subject.id) }}" class="btn btn-ai btn-sm">Generate quiz</a>
   </div>
+  {% if subject.quizzes.count() > 0 %}
+    <p class="text-muted">{{ subject.quizzes.count() }} quiz{{ 'zes' if subject.quizzes.count() != 1 else '' }} in this subject.</p>
+  {% else %}
+    <p class="text-muted">No quizzes yet.</p>
+  {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Results: {{ quiz.title }} · NOTABL{% endblock %}
+{% block content %}
+<div class="container quiz-results-page">
+  <div class="quiz-score-banner">
+    <span class="label-accent">Score</span>
+    <h1>{{ quiz.score }} / {{ quiz.total_questions }}</h1>
+  </div>
+
+  {% for question in quiz.questions %}
+    <div class="card quiz-question quiz-question--{{ 'correct' if question.is_correct() else 'incorrect' }}">
+      <p class="quiz-question-number">Question {{ loop.index }}</p>
+      <p class="quiz-question-text">{{ question.question_text }}</p>
+      <p class="quiz-answer-line">Your answer: <strong>{{ question.user_answer or "No answer" }}</strong></p>
+      {% if not question.is_correct() %}
+        <p class="quiz-answer-line">Correct answer: <strong>{{ question.correct_answer }}</strong></p>
+      {% endif %}
+      {% if question.explanation %}
+        <p class="text-muted quiz-explanation">{{ question.explanation }}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <a href="{{ url_for('quizzes.list_quizzes') }}" class="btn btn-secondary">Back to quizzes</a>
+</div>
+{% endblock %}

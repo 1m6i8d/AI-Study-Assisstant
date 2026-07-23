@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Generate quiz · NOTABL{% endblock %}
+{% block content %}
+<div class="container form-page">
+  <h1>Generate a quiz</h1>
+  <p class="text-muted">Questions are generated from your notes in the selected subject.</p>
+
+  <form method="POST" novalidate class="card">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.subject_id.label(class="form-label") }}
+      {{ form.subject_id(class="form-control" + (" is-invalid" if form.subject_id.errors else "")) }}
+      {% for error in form.subject_id.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      <span class="form-label">Question types</span>
+      {% for value, label in form.question_types.choices %}
+        <label class="checkbox-option">
+          <input type="checkbox" name="question_types" value="{{ value }}"
+                 {% if form.question_types.data and value in form.question_types.data %}checked{% endif %}>
+          {{ label }}
+        </label>
+      {% endfor %}
+      {% for error in form.question_types.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.question_count.label(class="form-label") }}
+      {{ form.question_count(class="form-control" + (" is-invalid" if form.question_count.errors else "")) }}
+      {% for error in form.question_count.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit(class="btn btn-ai") }}
+      <a href="{{ url_for('quizzes.list_quizzes') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

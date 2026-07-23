@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.title }} · NOTABL{% endblock %}
+{% block content %}
+<div class="container quiz-take-page">
+  <h1>{{ quiz.title }}</h1>
+
+  <form method="POST" action="{{ url_for('quizzes.submit', quiz_id=quiz.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {% for question in quiz.questions %}
+      <div class="card quiz-question">
+        <p class="quiz-question-number">Question {{ loop.index }} of {{ quiz.total_questions }}</p>
+        <p class="quiz-question-text">{{ question.question_text }}</p>
+
+        {% if question.question_type in ("multiple_choice", "true_false") %}
+          {% for option in question.options() %}
+            <label class="quiz-option">
+              <input type="radio" name="question_{{ question.id }}" value="{{ option }}" required>
+              {{ option }}
+            </label>
+          {% endfor %}
+        {% else %}
+          <input type="text" name="question_{{ question.id }}" class="form-control" placeholder="Your answer" required>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-ai">Submit quiz</button>
+  </form>
+</div>
+{% endblock %}
