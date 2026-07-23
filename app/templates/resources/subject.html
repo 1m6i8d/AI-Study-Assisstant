@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Resources: {{ subject.name }} · NOTABL{% endblock %}
+{% block content %}
+<div class="container resources-page">
+  <div class="page-header">
+    <div>
+      <h1>Resources for {{ subject.name }}</h1>
+      {% if data.keywords %}
+        <div class="tag-list">
+          {% for kw in data.keywords %}
+            <span class="tag-chip tag-chip--ai">{{ kw }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('resources.subject_resources', subject_id=subject.id, refresh=1) }}" class="btn btn-secondary btn-sm">Refresh</a>
+  </div>
+
+  {% if data.cached %}
+    <p class="text-muted">Showing cached results from {{ data.fetched_at.strftime('%b %d, %I:%M %p') }}. <a href="{{ url_for('resources.subject_resources', subject_id=subject.id, refresh=1) }}">Refresh now</a>.</p>
+  {% endif %}
+
+  <h2>Videos</h2>
+  {% if data.videos %}
+    <div class="resource-grid">
+      {% for video in data.videos %}
+        <a href="{{ video.url }}" target="_blank" rel="noopener" class="resource-card">
+          <img src="{{ video.thumbnail }}" alt="" class="resource-thumb" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="resource-thumb resource-thumb--fallback" style="display:none;">▶</div>
+          <div class="resource-card-body">
+            <p class="resource-title">{{ video.title }}</p>
+            <p class="text-muted resource-meta">{{ video.channel }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No video results found.</p>
+  {% endif %}
+
+  <h2>Books</h2>
+  {% if data.books %}
+    <div class="resource-grid">
+      {% for book in data.books %}
+        <a href="{{ book.url }}" target="_blank" rel="noopener" class="resource-card">
+          {% if book.thumbnail %}
+            <img src="{{ book.thumbnail }}" alt="" class="resource-thumb resource-thumb--book">
+          {% endif %}
+          <div class="resource-card-body">
+            <p class="resource-title">{{ book.title }}</p>
+            <p class="text-muted resource-meta">{{ book.authors }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No book results found.</p>
+  {% endif %}
+</div>
+{% endblock %}

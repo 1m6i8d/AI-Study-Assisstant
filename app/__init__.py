@@ -82,6 +82,7 @@ def _register_blueprints(app):
     from app.quizzes.routes import quizzes_bp
     from app.tutor.routes import tutor_bp
     from app.timetable.routes import timetable_bp
+    from app.resources.routes import resources_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -92,3 +93,4 @@ def _register_blueprints(app):
     app.register_blueprint(quizzes_bp, url_prefix="/quizzes")
     app.register_blueprint(tutor_bp, url_prefix="/tutor")
     app.register_blueprint(timetable_bp, url_prefix="/timetable")
+    app.register_blueprint(resources_bp, url_prefix="/resources")

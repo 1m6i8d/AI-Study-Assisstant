@@ -75,5 +75,11 @@
   {% else %}
     <p class="text-muted">No quizzes yet.</p>
   {% endif %}
+
+  <div class="section-header">
+    <h2>Resources</h2>
+    <a href="{{ url_for('resources.subject_resources', subject_id=subject.id) }}" class="btn btn-ai btn-sm">Find resources</a>
+  </div>
+  <p class="text-muted">Get YouTube videos and book suggestions based on this subject's notes.</p>
 </div>
 {% endblock %}
