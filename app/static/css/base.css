@@ -68,6 +68,28 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   font-weight: 400;
   letter-spacing: 0.03em;
 }
+.navbar-search {
+  margin: 0 var(--space-2);
+}
+.navbar-search input {
+  width: 200px;
+  font-size: var(--text-small);
+  padding: 4px var(--space-2);
+}
+.navbar-search { position: relative; }
+.inline-tooltip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: var(--color-text-primary);
+  color: var(--color-bg);
+  font-size: var(--text-caption);
+  padding: 4px var(--space-2);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+}
 
 /* Dropdown menu (navbar "More") */
 .dropdown-menu {
@@ -876,3 +898,5 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   height: 100%;
   transition: width var(--transition-base);
 }
+.search-page { margin-top: var(--space-5); margin-bottom: var(--space-6); }
+.search-page h2 { margin-top: var(--space-4); }

@@ -84,6 +84,7 @@ def _register_blueprints(app):
     from app.timetable.routes import timetable_bp
     from app.library.routes import library_bp
     from app.analytics.routes import analytics_bp
+    from app.search.routes import search_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -96,3 +97,4 @@ def _register_blueprints(app):
     app.register_blueprint(timetable_bp, url_prefix="/timetable")
     app.register_blueprint(library_bp, url_prefix="/library")
     app.register_blueprint(analytics_bp, url_prefix="/analytics")
+    app.register_blueprint(search_bp, url_prefix="/search")

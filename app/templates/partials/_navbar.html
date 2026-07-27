@@ -27,6 +27,10 @@
             <a class="nav-link" href="{{ url_for('tutor.index') }}">AI Tutor</a>
           </li>
         </ul>
+        <form class="navbar-search" action="{{ url_for('search.results') }}" method="GET" id="navbar-search-form">
+          <input type="search" name="q" class="form-control" placeholder="Search..." aria-label="Search" id="navbar-search-input">
+          <div class="inline-tooltip" id="navbar-search-tooltip" hidden>Type something to search</div>
+        </form>
         <ul class="navbar-nav">
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('auth.profile') }}">Profile</a>

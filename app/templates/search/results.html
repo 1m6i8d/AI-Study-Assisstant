@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Search: {{ data.query }} · NOTABL{% endblock %}
+{% block content %}
+<div class="container search-page">
+  <h1>Search results for "{{ data.query }}"</h1>
+
+  {% if not data.query %}
+    <div class="empty-state">
+      <h3>Type something to search</h3>
+      <p class="text-muted">Search across your subjects, notes, and flashcards.</p>
+    </div>
+  {% elif not data.subjects and not data.notes and not data.flashcards %}
+    <div class="empty-state">
+      <h3>No results found</h3>
+      <p class="text-muted">Try a different search term.</p>
+    </div>
+  {% else %}
+    {% if data.subjects %}
+      <h2>Subjects</h2>
+      <div class="subject-grid">
+        {% for subject in data.subjects %}
+          <a href="{{ url_for('subjects.view_subject', subject_id=subject.id) }}" class="subject-card subject-card--{{ subject.color }}">
+            <h3>{{ subject.name }}</h3>
+            {% if subject.description %}<p class="text-muted">{{ subject.description }}</p>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if data.notes %}
+      <h2>Notes</h2>
+      <div class="note-list">
+        {% for note in data.notes %}
+          <a href="{{ url_for('notes.view_note', note_id=note.id) }}" class="note-row">
+            <div>
+              <h3>{{ note.title }}</h3>
+              <p class="text-muted">{{ note.subject.name }}</p>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if data.flashcards %}
+      <h2>Flashcards</h2>
+      <div class="flashcard-grid">
+        {% for card in data.flashcards %}
+          <a href="{{ url_for('flashcards.list_flashcards', subject_id=card.subject_id) }}" class="flashcard-tile">
+            <p class="flashcard-front">{{ card.front }}</p>
+            <p class="text-muted">{{ card.subject.name }}</p>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
