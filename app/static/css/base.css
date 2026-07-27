@@ -599,6 +599,15 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 .timer-controls { display: flex; gap: var(--space-2); justify-content: center; }
 .timer-status { margin-top: var(--space-3); min-height: 20px; }
 
+.study-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+}
+.study-stats-bar .stat-tile {
+  flex: 0 1 auto;
+  min-width: 140px;
+}
+
 /* Timetable */
 .timetable-nav {
   display: flex;
@@ -606,9 +615,15 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   align-items: center;
   margin-bottom: var(--space-3);
 }
-.timetable-grid-wrapper { overflow-x: auto; }
+.timetable-grid-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
 .timetable-grid {
   display: grid;
+  width: max-content;
+  margin: 0 auto;
   grid-template-columns: 60px repeat(7, minmax(120px, 1fr));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);

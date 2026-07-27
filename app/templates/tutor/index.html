@@ -12,13 +12,13 @@
       {% for msg in conversations %}
         <div class="quiz-row">
           <a href="{{ url_for('tutor.conversation', conversation_id=msg.conversation_id) }}" class="tutor-conv-link">
-            <h3>{{ msg.content[:60] }}{{ "..." if msg.content|length > 60 else "" }}</h3>
+            <h3>{{ (msg.content | replace('*', '') | replace('_', '') | replace('#', '') | replace('`', ''))[:60] }}{{ "..." if msg.content|length > 60 else "" }}</h3>
             <p class="text-muted">{{ msg.created_at.strftime('%b %d, %Y at %I:%M %p') }}</p>
           </a>
           <form method="POST" action="{{ url_for('tutor.delete', conversation_id=msg.conversation_id) }}"
                 data-confirm-message="Delete this conversation permanently?">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn btn-ghost btn-sm">Delete</button>
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
           </form>
         </div>
       {% endfor %}

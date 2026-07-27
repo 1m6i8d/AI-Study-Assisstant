@@ -68,7 +68,12 @@
 
   <div class="section-header">
     <h2>Quizzes</h2>
-    <a href="{{ url_for('quizzes.generate', subject_id=subject.id) }}" class="btn btn-ai btn-sm">Generate quiz</a>
+    <div class="page-header-actions">
+      {% if subject.quizzes.count() > 0 %}
+        <a href="{{ url_for('quizzes.list_quizzes', subject_id=subject.id) }}" class="btn btn-secondary btn-sm">View quizzes</a>
+      {% endif %}
+      <a href="{{ url_for('quizzes.generate', subject_id=subject.id) }}" class="btn btn-ai btn-sm">Generate quiz</a>
+    </div>
   </div>
   {% if subject.quizzes.count() > 0 %}
     <p class="text-muted">{{ subject.quizzes.count() }} quiz{{ 'zes' if subject.quizzes.count() != 1 else '' }} in this subject.</p>
