@@ -66,6 +66,7 @@ def build_week_grid(user_id, week_start):
                 "conflict": e.id in conflicting_ids,
             })
 
+        positioned = get_fulfillment_for_day(positioned, user_id, day_date)
         days.append({"date": day_date, "entries": positioned})
 
     return days
@@ -74,3 +75,29 @@ def build_week_grid(user_id, week_start):
 def get_week_start(reference_date):
     """Return the Monday of the week containing reference_date."""
     return reference_date - timedelta(days=reference_date.weekday())
+
+def get_fulfillment_for_day(entries_with_positions, user_id, day_date):
+    """Mark each positioned entry as fulfilled if a completed session linked to it
+    happened on this specific calendar date."""
+    from app.models.study_session import StudySession
+
+    entry_ids = [item["entry"].id for item in entries_with_positions]
+    if not entry_ids:
+        return entries_with_positions
+
+    fulfilled_ids = set()
+    sessions = (
+        StudySession.query
+        .filter(StudySession.user_id == user_id)
+        .filter(StudySession.timetable_entry_id.in_(entry_ids))
+        .filter(StudySession.completed == True)
+        .all()
+    )
+    for s in sessions:
+        if s.completed_at and s.completed_at.date() == day_date:
+            fulfilled_ids.add(s.timetable_entry_id)
+
+    for item in entries_with_positions:
+        item["fulfilled"] = item["entry"].id in fulfilled_ids
+
+    return entries_with_positions

@@ -80,11 +80,21 @@
   const subjectSelect = document.getElementById("subject-select");
   const csrfToken = "{{ csrf_token() }}";
 
+  const prefillMinutes = {{ prefill_minutes | tojson }};
+  const prefillSubjectId = {{ prefill_subject_id | tojson }};
+  const prefillEntryId = {{ prefill_entry_id | tojson }};
+
   let selectedMinutes = null;
   let remainingSeconds = 0;
   let intervalId = null;
   let paused = false;
   let sessionId = null;
+
+  function updateDisplay(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    display.textContent = `${m}:${s}`;
+  }
 
   document.querySelectorAll(".duration-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -109,10 +119,15 @@
     }
   });
 
-  function updateDisplay(seconds) {
-    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    display.textContent = `${m}:${s}`;
+  // Pre-fill from a Timetable "start timer" link, if present
+  if (prefillMinutes) {
+    selectedMinutes = prefillMinutes;
+    updateDisplay(prefillMinutes * 60);
+    startBtn.disabled = false;
+    customInput.value = prefillMinutes;
+  }
+  if (prefillSubjectId && subjectSelect) {
+    subjectSelect.value = String(prefillSubjectId);
   }
 
   async function startTimer() {
@@ -123,7 +138,11 @@
       const res = await fetch("/study/sessions/start", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-        body: JSON.stringify({ planned_minutes: selectedMinutes, subject_id: subjectId }),
+        body: JSON.stringify({
+          planned_minutes: selectedMinutes,
+          subject_id: subjectId,
+          timetable_entry_id: prefillEntryId || null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {

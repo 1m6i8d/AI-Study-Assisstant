@@ -10,6 +10,7 @@ class StudySession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     subject_id = db.Column(db.Integer, db.ForeignKey("subjects.id"), nullable=True, index=True)
+    timetable_entry_id = db.Column(db.Integer, db.ForeignKey("timetable_entries.id"), nullable=True, index=True)
 
     planned_minutes = db.Column(db.Integer, nullable=False)
     started_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -18,9 +19,9 @@ class StudySession(db.Model):
 
     user = db.relationship("User", backref=db.backref("study_sessions", lazy="dynamic"))
     subject = db.relationship("Subject", backref=db.backref("study_sessions", lazy="dynamic"))
+    timetable_entry = db.relationship("TimetableEntry", backref=db.backref("study_sessions", lazy="dynamic"))
 
     def actual_minutes(self):
-        """Actual elapsed minutes, or None if not yet completed."""
         if not self.completed_at:
             return None
         return round((self.completed_at - self.started_at).total_seconds() / 60)

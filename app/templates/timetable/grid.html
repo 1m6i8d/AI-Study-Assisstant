@@ -30,12 +30,18 @@
           </div>
           <div class="timetable-day-body" style="height: {{ (hours|length) * 60 }}px;">
             {% for item in day.entries %}
-              <a href="{{ url_for('timetable.edit_entry', entry_id=item.entry.id) }}"
-                 class="timetable-entry {{ 'timetable-entry--conflict' if item.conflict else '' }}"
+              <div class="timetable-entry {{ 'timetable-entry--conflict' if item.conflict else '' }} {{ 'timetable-entry--fulfilled' if item.fulfilled else '' }}"
                  style="top: {{ item.top }}px; height: {{ item.height }}px;">
-                <span class="timetable-entry-title">{{ item.entry.title }}</span>
+              <a href="{{ url_for('timetable.edit_entry', entry_id=item.entry.id) }}" class="timetable-entry-link">
+                <span class="timetable-entry-title">{{ item.entry.title }}{% if item.fulfilled %} ✓{% endif %}</span>
                 <span class="timetable-entry-time">{{ item.entry.start_time.strftime('%I:%M %p') }}</span>
               </a>
+              {% if item.entry.subject_id and not item.fulfilled %}
+                {% set minutes = ((item.entry.end_time.hour * 60 + item.entry.end_time.minute) - (item.entry.start_time.hour * 60 + item.entry.start_time.minute)) %}
+                <a href="{{ url_for('study.timer', subject_id=item.entry.subject_id, minutes=minutes, entry_id=item.entry.id) }}"
+                   class="timetable-entry-start-btn" title="Start timer for this slot">▶</a>
+              {% endif %}
+            </div>
             {% endfor %}
           </div>
         </div>

@@ -19,6 +19,11 @@ MAX_CUSTOM_MINUTES = 240
 def timer():
     subjects = get_subject_choices(current_user.id)
     stats = get_study_stats(current_user.id)
+
+    prefill_subject_id = request.args.get("subject_id", type=int)
+    prefill_minutes = request.args.get("minutes", type=int)
+    prefill_entry_id = request.args.get("entry_id", type=int)
+
     return render_template(
         "study/timer.html",
         subjects=subjects,
@@ -27,6 +32,9 @@ def timer():
         max_custom=MAX_CUSTOM_MINUTES,
         daily_goal=current_user.daily_goal_minutes,
         weekly_goal=current_user.weekly_goal_minutes,
+        prefill_subject_id=prefill_subject_id,
+        prefill_minutes=prefill_minutes,
+        prefill_entry_id=prefill_entry_id,
     )
 
 
@@ -36,14 +44,15 @@ def start():
     data = request.get_json(silent=True) or {}
     planned_minutes = data.get("planned_minutes")
     subject_id = data.get("subject_id")
+    entry_id = data.get("timetable_entry_id")
 
     if not isinstance(planned_minutes, int) or not (1 <= planned_minutes <= MAX_CUSTOM_MINUTES):
         return jsonify({"error": "Invalid duration."}), 400
 
     if subject_id:
-        get_subject_or_404(subject_id, current_user.id)  # 404s if not owned
+        get_subject_or_404(subject_id, current_user.id)
 
-    session = start_session(current_user.id, planned_minutes, subject_id)
+    session = start_session(current_user.id, planned_minutes, subject_id, timetable_entry_id=entry_id)
     return jsonify({"session_id": session.id})
 
 

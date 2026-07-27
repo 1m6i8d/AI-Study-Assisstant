@@ -5,8 +5,13 @@ from app.extensions import db
 from app.models.study_session import StudySession
 
 
-def start_session(user_id, planned_minutes, subject_id=None):
-    session = StudySession(user_id=user_id, subject_id=subject_id, planned_minutes=planned_minutes)
+def start_session(user_id, planned_minutes, subject_id=None, timetable_entry_id=None):
+    session = StudySession(
+        user_id=user_id,
+        subject_id=subject_id,
+        planned_minutes=planned_minutes,
+        timetable_entry_id=timetable_entry_id,
+    )
     db.session.add(session)
     db.session.commit()
     return session
