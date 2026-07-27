@@ -5,7 +5,7 @@ from datetime import datetime
 from app.extensions import db
 
 QUESTION_TYPES = ["multiple_choice", "true_false", "short_answer"]
-MAX_ATTEMPTS_KEPT = 3
+MAX_ATTEMPTS_KEPT = 1
 
 
 class Quiz(db.Model):

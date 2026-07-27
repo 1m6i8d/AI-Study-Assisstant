@@ -58,6 +58,7 @@
     hintEl.hidden = false;
     revealed = false;
     positionEl.textContent = index + 1;
+    cardEl.focus();
   }
 
   function reveal() {
@@ -105,5 +106,6 @@
   });
 
   showCard(0);
+  cardEl.focus();
 </script>
 {% endblock %}

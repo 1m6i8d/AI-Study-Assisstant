@@ -38,5 +38,16 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <script src="{{ url_for('static', filename='js/markdown-editor.js') }}"></script>
   {% block extra_js %}{% endblock %}
+
+  <div class="modal-overlay" id="confirm-modal-overlay" hidden>
+    <div class="modal-panel">
+      <h3 id="confirm-modal-message">Are you sure?</h3>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="confirm-modal-cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-modal-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/confirm-modal.js') }}"></script>
 </body>
 </html>

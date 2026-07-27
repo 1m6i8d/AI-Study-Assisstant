@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ subject.name }} Library · NOTABL{% endblock %}
+{% block content %}
+<div class="container library-page">
+  <h1>{{ subject.name }}</h1>
+
+  <h2>Videos</h2>
+  <form method="POST" action="{{ url_for('library.add_video', subject_id=subject.id) }}" class="library-add-form">
+    {{ video_form.hidden_tag() }}
+    {{ video_form.youtube_url(class="form-control", placeholder="Paste a YouTube URL") }}
+    {{ video_form.submit(class="btn btn-secondary btn-sm") }}
+  </form>
+  {% if videos %}
+    <div class="resource-grid">
+      {% for v in videos %}
+        <div class="resource-card">
+          {% if v.thumbnail %}<img src="{{ v.thumbnail }}" alt="" class="resource-thumb">{% endif %}
+          <div class="resource-card-body">
+            <a href="{{ v.url }}" target="_blank" rel="noopener" class="resource-title">{{ v.title }}</a>
+            <p class="text-muted resource-meta">{{ v.creator }}</p>
+            <form method="POST" action="{{ url_for('library.delete_item', item_id=v.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No videos saved yet.</p>
+  {% endif %}
+
+  <h2>Books</h2>
+  <form method="POST" action="{{ url_for('library.add_book', subject_id=subject.id) }}" class="library-add-form">
+    {{ book_form.hidden_tag() }}
+    {{ book_form.title_query(class="form-control", placeholder="Book title") }}
+    {{ book_form.submit(class="btn btn-secondary btn-sm") }}
+  </form>
+  {% if books %}
+    <div class="resource-grid">
+      {% for b in books %}
+        <div class="resource-card">
+          {% if b.thumbnail %}<img src="{{ b.thumbnail }}" alt="" class="resource-thumb resource-thumb--book">{% endif %}
+          <div class="resource-card-body">
+            <a href="{{ b.url }}" target="_blank" rel="noopener" class="resource-title">{{ b.title }}</a>
+            <p class="text-muted resource-meta">{{ b.creator }}</p>
+            <form method="POST" action="{{ url_for('library.delete_item', item_id=b.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No books saved yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

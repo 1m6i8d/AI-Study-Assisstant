@@ -7,7 +7,7 @@
     <a href="{{ url_for('subjects.create_subject') }}" class="btn btn-primary">New subject</a>
   </div>
 
-  <form method="GET" class="filter-bar" role="search">
+  <form method="GET" class="filter-bar" role="search" id="subject-filter-form">
     <input
       type="search"
       name="search"
@@ -16,18 +16,11 @@
       value="{{ search }}"
       aria-label="Search subjects"
     >
-    <select name="color" class="form-control" aria-label="Filter by color">
-      <option value="">All colors</option>
-      {% for c in ["indigo", "teal", "amber", "rose", "slate", "emerald"] %}
-        <option value="{{ c }}" {% if selected_color == c %}selected{% endif %}>{{ c.capitalize() }}</option>
-      {% endfor %}
-    </select>
     <select name="sort" class="form-control" aria-label="Sort subjects">
       {% for key, (_, label) in sort_options.items() %}
         <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <button type="submit" class="btn btn-secondary">Apply</button>
   </form>
 
   {% if subjects %}
@@ -43,10 +36,10 @@
     </div>
   {% else %}
     <div class="empty-state">
-      {% if search or selected_color %}
-        <h3>No subjects match your filters</h3>
-        <p class="text-muted">Try a different search term or clear the color filter.</p>
-        <a href="{{ url_for('subjects.list_subjects') }}" class="btn btn-secondary">Clear filters</a>
+      {% if search %}
+        <h3>No subjects match your search</h3>
+        <p class="text-muted">Try a different search term.</p>
+        <a href="{{ url_for('subjects.list_subjects') }}" class="btn btn-secondary">Clear search</a>
       {% else %}
         <h3>No subjects yet</h3>
         <p class="text-muted">Create your first subject to start organizing notes, flashcards, and quizzes.</p>
@@ -55,4 +48,20 @@
     </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const filterForm = document.getElementById("subject-filter-form");
+  const searchInput = filterForm.querySelector('input[name="search"]');
+  const sortSelect = filterForm.querySelector('select[name="sort"]');
+  let debounceTimer = null;
+
+  searchInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => filterForm.submit(), 500);
+  });
+
+  sortSelect.addEventListener("change", () => filterForm.submit());
+</script>
 {% endblock %}

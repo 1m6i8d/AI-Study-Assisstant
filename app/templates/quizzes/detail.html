@@ -15,7 +15,7 @@
 
   {% if attempts %}
     <h2>Attempt history</h2>
-    <p class="text-muted">Only the last {{ 3 }} attempts are kept — older ones are removed automatically.</p>
+    <p class="text-muted">Only your most recent attempt is kept — older ones are removed automatically.</p>
     <div class="quiz-list">
       {% for attempt in attempts %}
         <a href="{{ url_for('quizzes.results' if attempt.completed_at else 'quizzes.take_attempt', attempt_id=attempt.id) }}" class="quiz-row">

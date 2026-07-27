@@ -12,7 +12,7 @@
     <div class="page-header-actions">
       <a href="{{ url_for('subjects.edit_subject', subject_id=subject.id) }}" class="btn btn-secondary">Edit</a>
       <form method="POST" action="{{ url_for('subjects.delete_subject', subject_id=subject.id) }}"
-            onsubmit="return confirm('Delete this subject? This cannot be undone.');">
+            data-confirm-message="Delete this subject? This cannot be undone.">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-danger">Delete</button>
       </form>
@@ -77,9 +77,8 @@
   {% endif %}
 
   <div class="section-header">
-    <h2>Resources</h2>
-    <a href="{{ url_for('resources.subject_resources', subject_id=subject.id) }}" class="btn btn-ai btn-sm">Find resources</a>
+    <h2>Library</h2>
+    <a href="{{ url_for('library.shelf', subject_id=subject.id) }}" class="btn btn-secondary btn-sm">View shelf</a>
   </div>
-  <p class="text-muted">Get YouTube videos and book suggestions based on this subject's notes.</p>
 </div>
 {% endblock %}

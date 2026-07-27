@@ -15,10 +15,7 @@
             <a class="nav-link" href="{{ url_for('subjects.list_subjects') }}">Subjects</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('notes.list_notes') }}">Notes</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('flashcards.list_flashcards') }}">Flashcards</a>
+            <a class="nav-link" href="{{ url_for('library.shelves') }}">Library</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('timetable.grid') }}">Timetable</a>
@@ -27,16 +24,13 @@
             <a class="nav-link" href="{{ url_for('study.timer') }}">Study</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('quizzes.list_quizzes') }}">Quizzes</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="{{ url_for('tutor.index') }}">AI Tutor</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('auth.profile') }}">Profile</a>
           </li>
         </ul>
         <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.profile') }}">Profile</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('auth.logout') }}">Log out</a>
           </li>

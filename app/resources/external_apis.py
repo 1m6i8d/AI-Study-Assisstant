@@ -72,3 +72,49 @@ def search_books(query, max_results=5, _retry=True):
             "description": (info.get("description", "") or "")[:200],
         })
     return results
+
+def get_youtube_video_details(video_id):
+    """Fetch title/thumbnail/channel for one known video ID (cheaper than search)."""
+    api_key = os.environ.get("YOUTUBE_API_KEY")
+    if not api_key:
+        return None
+
+    params = {"part": "snippet", "id": video_id, "key": api_key}
+    try:
+        response = requests.get("https://www.googleapis.com/youtube/v3/videos", params=params, timeout=8)
+        response.raise_for_status()
+        items = response.json().get("items", [])
+    except requests.RequestException:
+        return None
+
+    if not items:
+        return None
+
+    snippet = items[0]["snippet"]
+    return {
+        "video_id": video_id,
+        "title": snippet.get("title", ""),
+        "channel": snippet.get("channelTitle", ""),
+        "thumbnail": snippet.get("thumbnails", {}).get("medium", {}).get("url", ""),
+        "url": f"https://www.youtube.com/watch?v={video_id}",
+    }
+
+
+def search_books_best_match(title_query):
+    """Return the single best-matching book for a manually-typed title, or None."""
+    results = search_books(title_query, max_results=1)
+    return results[0] if results else None
+
+
+def extract_youtube_video_id(url):
+    """Pull a video ID out of common YouTube URL formats."""
+    import re
+    patterns = [
+        r"(?:v=|\/)([0-9A-Za-z_-]{11})(?:&|\?|$|\/)",
+        r"youtu\.be\/([0-9A-Za-z_-]{11})",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None

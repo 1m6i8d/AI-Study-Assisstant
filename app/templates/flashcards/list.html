@@ -39,7 +39,7 @@
           <div class="flashcard-actions">
             <a href="{{ url_for('flashcards.edit_flashcard', flashcard_id=card.id) }}" class="btn btn-ghost btn-sm">Edit</a>
             <form method="POST" action="{{ url_for('flashcards.delete_flashcard', flashcard_id=card.id) }}"
-                  onsubmit="return confirm('Delete this flashcard?');">
+                  data-confirm-message="Delete this flashcard?">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="btn btn-ghost btn-sm">Delete</button>
             </form>

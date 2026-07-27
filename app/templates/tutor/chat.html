@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}AI Tutor · NOTABL{% endblock %}
 {% block content %}
+{% from "tutor/_macros.html" import resource_card %}
 <div class="container tutor-chat-page">
   <div class="page-header">
     <h1>AI Tutor</h1>
@@ -20,13 +21,41 @@
   {% endif %}
 
   <div class="chat-window" id="chat-window">
+    {% if not messages %}
+      <div class="chat-message chat-message--assistant">
+        <span class="label-accent">Tutor</span>
+        <div class="chat-bubble">
+          <p>Hi! I'm your AI study assistant. The quickest way to get value here:</p>
+          <ul>
+            <li>Find real videos or books — "suggest YouTube videos on this topic"</li>
+          </ul>
+          <p>I can also help with:</p>
+          <ul>
+            <li>Explaining a concept — "Explain normalization in databases"</li>
+            <li>Summarizing a note — attach one above, then ask "summarize this"</li>
+            <li>Building a study plan — "give me a revision plan for this week"</li>
+          </ul>
+          <p>Attach a note above for extra context, or just ask away.</p>
+        </div>
+      </div>
+    {% endif %}
+
     {% for msg in messages %}
       <div class="chat-message chat-message--{{ msg.role }}">
         <span class="label-accent">{{ "You" if msg.role == "user" else "Tutor" }}</span>
-        {% if msg.role == "assistant" %}
-          <p class="markdown-content" data-markdown-render data-markdown-source="{{ msg.content | e }}"></p>
-        {% else %}
-          <p>{{ msg.content }}</p>
+        <div class="chat-bubble">
+          {% if msg.role == "assistant" %}
+            <p class="markdown-content" data-markdown-render data-markdown-source="{{ msg.content | e }}"></p>
+          {% else %}
+            <p>{{ msg.content }}</p>
+          {% endif %}
+        </div>
+        {% set res = msg.resources() %}
+        {% if res %}
+          <div class="resource-suggestions">
+            {% for video in res.videos %}{{ resource_card(video, "video", msg.id) }}{% endfor %}
+            {% for book in res.books %}{{ resource_card(book, "book", msg.id) }}{% endfor %}
+          </div>
         {% endif %}
       </div>
     {% endfor %}
@@ -36,6 +65,14 @@
     <input type="text" id="chat-input" class="form-control" placeholder="Ask a question..." maxlength="2000" required>
     <button type="submit" class="btn btn-ai" id="chat-send-btn">Send</button>
   </form>
+
+  <div class="modal-overlay" id="subject-picker-overlay" hidden>
+    <div class="modal-panel">
+      <h3>Save to which subject?</h3>
+      <div class="modal-option-list" id="subject-picker-list"></div>
+      <button type="button" class="btn btn-secondary" id="subject-picker-cancel">Cancel</button>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -49,13 +86,45 @@
   const noteSelect = document.getElementById("note-select");
   const csrfToken = "{{ csrf_token() }}";
   const conversationId = "{{ conversation_id }}";
+  const subjects = {{ subjects_json | safe }};
 
-  function appendMessage(role, content) {
+  const overlay = document.getElementById("subject-picker-overlay");
+  const pickerList = document.getElementById("subject-picker-list");
+  const pickerCancel = document.getElementById("subject-picker-cancel");
+  let pendingSaveBtn = null;
+
+  function buildResourceCardHTML(item, itemType) {
+    const meta = item.channel || item.authors || "";
+    const thumb = item.thumbnail
+      ? `<img src="${item.thumbnail}" alt="" class="resource-thumb">`
+      : "";
+    return `
+      <div class="resource-card resource-card--inline">
+        ${thumb}
+        <div class="resource-card-body">
+          <p class="resource-title">${item.title}</p>
+          <p class="text-muted resource-meta">${meta}</p>
+          <a href="${item.url}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Open</a>
+          <button type="button" class="btn btn-ai btn-sm save-resource-btn"
+                  data-type="${itemType}" data-title="${item.title.replace(/"/g, '&quot;')}"
+                  data-url="${item.url}" data-thumbnail="${item.thumbnail || ''}"
+                  data-creator="${(meta || '').replace(/"/g, '&quot;')}">Save</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function appendMessage(role, content, resources) {
     const div = document.createElement("div");
     div.className = `chat-message chat-message--${role}`;
+
     const label = document.createElement("span");
     label.className = "label-accent";
     label.textContent = role === "user" ? "You" : "Tutor";
+    div.appendChild(label);
+
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble";
     const p = document.createElement("p");
     if (role === "assistant") {
       p.className = "markdown-content";
@@ -63,10 +132,85 @@
     } else {
       p.textContent = content;
     }
-    div.appendChild(label);
-    div.appendChild(p);
+    bubble.appendChild(p);
+    div.appendChild(bubble);
+
+    if (resources && (resources.videos?.length || resources.books?.length)) {
+      const resourcesDiv = document.createElement("div");
+      resourcesDiv.className = "resource-suggestions";
+      (resources.videos || []).forEach((v) => {
+        resourcesDiv.insertAdjacentHTML("beforeend", buildResourceCardHTML(v, "video"));
+      });
+      (resources.books || []).forEach((b) => {
+        resourcesDiv.insertAdjacentHTML("beforeend", buildResourceCardHTML(b, "book"));
+      });
+      div.appendChild(resourcesDiv);
+    }
+
     chatWindow.appendChild(div);
     chatWindow.scrollTop = chatWindow.scrollHeight;
+    attachSaveHandlers(div);
+  }
+
+  function openSubjectPicker(btn) {
+    pendingSaveBtn = btn;
+    pickerList.innerHTML = "";
+    subjects.forEach(([id, name]) => {
+      const optBtn = document.createElement("button");
+      optBtn.type = "button";
+      optBtn.className = "modal-option";
+      optBtn.textContent = name;
+      optBtn.addEventListener("click", () => confirmSave(id));
+      pickerList.appendChild(optBtn);
+    });
+    overlay.hidden = false;
+  }
+
+  function closeSubjectPicker() {
+    overlay.hidden = true;
+    pendingSaveBtn = null;
+  }
+
+  async function confirmSave(subjectId) {
+    const btn = pendingSaveBtn;
+    closeSubjectPicker();
+    if (!btn) return;
+
+    try {
+      const res = await fetch("/tutor/save-resource", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify({
+          subject_id: subjectId,
+          item_type: btn.dataset.type,
+          title: btn.dataset.title,
+          url: btn.dataset.url,
+          thumbnail: btn.dataset.thumbnail,
+          creator: btn.dataset.creator,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        btn.textContent = data.duplicate ? "Already saved" : "Saved";
+        btn.disabled = true;
+      } else {
+        alert(data.error || "Could not save.");
+      }
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Network error — could not save.");
+    }
+  }
+
+  pickerCancel.addEventListener("click", closeSubjectPicker);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSubjectPicker(); });
+
+  function attachSaveHandlers(container) {
+    container.querySelectorAll(".save-resource-btn").forEach((btn) => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = "true";
+      btn.addEventListener("click", () => openSubjectPicker(btn));
+    });
   }
 
   form.addEventListener("submit", async (e) => {
@@ -74,7 +218,7 @@
     const text = input.value.trim();
     if (!text) return;
 
-    appendMessage("user", text);
+    appendMessage("user", text, null);
     input.value = "";
     sendBtn.disabled = true;
     sendBtn.textContent = "Thinking...";
@@ -89,18 +233,19 @@
       });
       const data = await res.json();
       if (res.ok) {
-        appendMessage("assistant", data.content);
+        appendMessage("assistant", data.content, data.resources);
       } else {
-        appendMessage("assistant", data.error || "Something went wrong.");
+        appendMessage("assistant", data.error || "Something went wrong.", null);
       }
     } catch (err) {
-      appendMessage("assistant", "Network error — could not reach the tutor.");
+      appendMessage("assistant", "Network error — could not reach the tutor.", null);
     } finally {
       sendBtn.disabled = false;
       sendBtn.textContent = "Send";
     }
   });
 
+  attachSaveHandlers(chatWindow);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 })();
 </script>

@@ -1,0 +1,14 @@
+{% macro resource_card(item, item_type, message_id) %}
+<div class="resource-card resource-card--inline">
+  {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="" class="resource-thumb">{% endif %}
+  <div class="resource-card-body">
+    <p class="resource-title">{{ item.title }}</p>
+    <p class="text-muted resource-meta">{{ item.channel or item.authors or "" }}</p>
+    <a href="{{ item.url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Open</a>
+    <button type="button" class="btn btn-ai btn-sm save-resource-btn"
+            data-type="{{ item_type }}" data-title="{{ item.title | e }}"
+            data-url="{{ item.url }}" data-thumbnail="{{ item.thumbnail or '' }}"
+            data-creator="{{ item.channel or item.authors or '' }}">Save</button>
+  </div>
+</div>
+{% endmacro %}

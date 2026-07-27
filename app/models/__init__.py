@@ -7,10 +7,10 @@ from app.models.study_session import StudySession
 from app.models.quiz import Quiz, QuizQuestion, QuizAttempt, QuizAttemptAnswer
 from app.models.chat_history import ChatHistory
 from app.models.timetable_entry import TimetableEntry
-from app.models.resource_cache import ResourceCache
+from app.models.library_item import LibraryItem
 
 __all__ = [
     "User", "Subject", "Note", "Flashcard", "StudySession",
     "Quiz", "QuizQuestion", "QuizAttempt", "QuizAttemptAnswer",
-    "ChatHistory", "TimetableEntry", "ResourceCache",
+    "ChatHistory", "TimetableEntry", "LibraryItem",
 ]
