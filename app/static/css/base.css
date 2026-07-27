@@ -846,3 +846,33 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   gap: var(--space-2);
   justify-content: flex-end;
 }
+
+.analytics-page { margin-top: var(--space-5); margin-bottom: var(--space-6); }
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.chart-card h3 { font-size: var(--text-h4); margin-bottom: var(--space-2); }
+.chart-card canvas { max-height: 260px; }
+
+.dashboard-page { margin-top: var(--space-5); margin-bottom: var(--space-6); }
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.goal-progress-bar {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  height: 8px;
+  margin-top: var(--space-1);
+  overflow: hidden;
+}
+.goal-progress-fill {
+  background-color: var(--color-primary);
+  height: 100%;
+  transition: width var(--transition-base);
+}

@@ -83,6 +83,7 @@ def _register_blueprints(app):
     from app.tutor.routes import tutor_bp
     from app.timetable.routes import timetable_bp
     from app.library.routes import library_bp
+    from app.analytics.routes import analytics_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -94,4 +95,4 @@ def _register_blueprints(app):
     app.register_blueprint(tutor_bp, url_prefix="/tutor")
     app.register_blueprint(timetable_bp, url_prefix="/timetable")
     app.register_blueprint(library_bp, url_prefix="/library")
-    # resources_bp intentionally not registered — replaced by Library
+    app.register_blueprint(analytics_bp, url_prefix="/analytics")

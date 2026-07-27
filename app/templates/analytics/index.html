@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Analytics · NOTABL{% endblock %}
+{% block content %}
+<div class="container analytics-page">
+  <h1>Analytics</h1>
+
+  <div class="stats-bar">
+    <div class="stat-tile">
+      <span class="label-accent">Total study time</span>
+      <p class="stat-value">{{ summary.total_study_hours }} <span class="stat-unit">hrs</span></p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">Notes</span>
+      <p class="stat-value">{{ summary.total_notes }}</p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">Flashcards</span>
+      <p class="stat-value">{{ summary.total_flashcards }}</p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">Quizzes taken</span>
+      <p class="stat-value">{{ summary.total_quizzes }}</p>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">Avg. quiz score</span>
+      <p class="stat-value">{{ summary.avg_quiz_score if summary.avg_quiz_score is not none else "—" }}{{ "%" if summary.avg_quiz_score is not none else "" }}</p>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="card chart-card">
+      <h3>Study hours (last 14 days)</h3>
+      <canvas id="chart-study-hours"></canvas>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Planned vs. actual study (last 7 days)</h3>
+      <canvas id="chart-planned-actual"></canvas>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Quiz scores over time</h3>
+      <canvas id="chart-quiz-scores"></canvas>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Notes created (last 14 days)</h3>
+      <canvas id="chart-notes-created"></canvas>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Subject distribution (by notes)</h3>
+      <canvas id="chart-subject-distribution"></canvas>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Flashcard difficulty</h3>
+      <canvas id="chart-flashcard-difficulty"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  const analyticsData = {{ data | tojson }};
+
+  const purple = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+  const blue = getComputedStyle(document.documentElement).getPropertyValue('--color-info').trim();
+  const green = getComputedStyle(document.documentElement).getPropertyValue('--color-success').trim();
+  const amber = getComputedStyle(document.documentElement).getPropertyValue('--color-warning').trim();
+  const red = getComputedStyle(document.documentElement).getPropertyValue('--color-danger').trim();
+  const gray = getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim();
+
+  const baseOptions = {
+    responsive: true,
+    plugins: { legend: { labels: { font: { family: 'Figtree' } } } },
+    scales: {
+      x: { ticks: { font: { family: 'Figtree', size: 11 } } },
+      y: { beginAtZero: true, ticks: { font: { family: 'Figtree', size: 11 } } },
+    },
+  };
+
+  new Chart(document.getElementById('chart-study-hours'), {
+    type: 'bar',
+    data: {
+      labels: analyticsData.study_hours.labels,
+      datasets: [{ label: 'Hours', data: analyticsData.study_hours.values, backgroundColor: purple }],
+    },
+    options: baseOptions,
+  });
+
+  new Chart(document.getElementById('chart-planned-actual'), {
+    type: 'bar',
+    data: {
+      labels: analyticsData.planned_vs_actual.labels,
+      datasets: [
+        { label: 'Planned', data: analyticsData.planned_vs_actual.planned, backgroundColor: gray },
+        { label: 'Actual', data: analyticsData.planned_vs_actual.actual, backgroundColor: purple },
+      ],
+    },
+    options: baseOptions,
+  });
+
+  new Chart(document.getElementById('chart-quiz-scores'), {
+    type: 'line',
+    data: {
+      labels: analyticsData.quiz_scores.labels,
+      datasets: [{
+        label: 'Score %', data: analyticsData.quiz_scores.values,
+        borderColor: purple, backgroundColor: purple, tension: 0.3,
+      }],
+    },
+    options: { ...baseOptions, scales: { ...baseOptions.scales, y: { ...baseOptions.scales.y, max: 100 } } },
+  });
+
+  new Chart(document.getElementById('chart-notes-created'), {
+    type: 'bar',
+    data: {
+      labels: analyticsData.notes_created.labels,
+      datasets: [{ label: 'Notes', data: analyticsData.notes_created.values, backgroundColor: blue }],
+    },
+    options: baseOptions,
+  });
+
+  new Chart(document.getElementById('chart-subject-distribution'), {
+    type: 'doughnut',
+    data: {
+      labels: analyticsData.subject_distribution.labels,
+      datasets: [{
+        data: analyticsData.subject_distribution.values,
+        backgroundColor: [purple, blue, green, amber, red, gray],
+      }],
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Figtree' } } } } },
+  });
+
+  new Chart(document.getElementById('chart-flashcard-difficulty'), {
+    type: 'bar',
+    data: {
+      labels: analyticsData.flashcard_difficulty.labels,
+      datasets: [{
+        label: 'Cards',
+        data: analyticsData.flashcard_difficulty.values,
+        backgroundColor: [green, amber, red, gray],
+      }],
+    },
+    options: baseOptions,
+  });
+</script>
+{% endblock %}

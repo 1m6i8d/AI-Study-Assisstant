@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · NOTABL{% endblock %}
+{% block content %}
+<div class="container dashboard-page">
+  <h1>Welcome back, {{ current_user.username }}</h1>
+
+  <div class="stats-bar">
+    <div class="stat-tile">
+      <span class="label-accent">Today's goal</span>
+      <p class="stat-value">{{ data.today_minutes }} <span class="stat-unit">/ {{ data.daily_goal_minutes }} min</span></p>
+      <div class="goal-progress-bar">
+        <div class="goal-progress-fill" style="width: {{ data.goal_pct }}%;"></div>
+      </div>
+    </div>
+    <div class="stat-tile">
+      <span class="label-accent">Streak</span>
+      <p class="stat-value">{{ data.streak }} <span class="stat-unit">day{{ 's' if data.streak != 1 else '' }}</span></p>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <h2>Today's schedule</h2>
+      {% if data.today_timetable %}
+        <div class="note-list">
+          {% for entry in data.today_timetable %}
+            <div class="note-row">
+              <div>
+                <h3>{{ entry.title }}</h3>
+                <p class="text-muted">{{ entry.start_time.strftime('%I:%M %p') }} – {{ entry.end_time.strftime('%I:%M %p') }}</p>
+              </div>
+              {% if entry.subject_id %}
+                <a href="{{ url_for('study.timer', subject_id=entry.subject_id) }}" class="btn btn-secondary btn-sm">Start timer</a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Nothing scheduled for today.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Flashcards due</h2>
+      {% if data.due_flashcards %}
+        <div class="note-list">
+          {% for card in data.due_flashcards %}
+            <a href="{{ url_for('flashcards.review', subject_id=card.subject_id) }}" class="note-row">
+              <div>
+                <h3>{{ card.front }}</h3>
+                <p class="text-muted">{{ card.subject.name }}</p>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">No flashcards due right now.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
