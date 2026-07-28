@@ -543,8 +543,8 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
 .stats-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 .stat-tile {
   background-color: var(--color-surface);
@@ -604,7 +604,7 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   flex-wrap: wrap;
 }
 .study-stats-bar .stat-tile {
-  flex: 0 1 auto;
+  flex: 1;
   min-width: 140px;
 }
 
@@ -899,7 +899,9 @@ h4 { font-size: var(--text-h4); margin-bottom: var(--space-1); }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--space-3);
-  margin-top: var(--space-4);
+}
+.dashboard-grid .card {
+  margin-bottom: 0;
 }
 .goal-progress-bar {
   background-color: var(--color-bg-secondary);
