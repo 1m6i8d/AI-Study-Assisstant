@@ -18,6 +18,8 @@ def create_app(config_name=None):
 
     _init_extensions(app)
     _register_blueprints(app)
+    _register_cli_commands(app)
+    _register_before_request(app)
     _register_error_handlers(app)
     _configure_logging(app)
 
@@ -85,6 +87,7 @@ def _register_blueprints(app):
     from app.library.routes import library_bp
     from app.analytics.routes import analytics_bp
     from app.search.routes import search_bp
+    from app.admin.routes import admin_bp
 
     app.register_blueprint(core_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -98,3 +101,50 @@ def _register_blueprints(app):
     app.register_blueprint(library_bp, url_prefix="/library")
     app.register_blueprint(analytics_bp, url_prefix="/analytics")
     app.register_blueprint(search_bp, url_prefix="/search")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
+
+
+def _register_cli_commands(app):
+    import click
+    from app.extensions import db, bcrypt
+    from app.models.user import User
+
+    @app.cli.command("create-admin")
+    @click.option("--email", prompt=True)
+    @click.option("--username", prompt=True)
+    @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
+    def create_admin(email, username, password):
+        """Create a new admin, or promote an existing account to admin by email."""
+        existing = User.query.filter_by(email=email.lower().strip()).first()
+        if existing:
+            existing.role = "admin"
+            existing.status = "approved"
+            db.session.commit()
+            click.echo(f"Promoted existing user '{existing.username}' to admin.")
+            return
+
+        hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
+        admin = User(
+            username=username.strip(),
+            email=email.lower().strip(),
+            password_hash=hashed_pw,
+            role="admin",
+            status="approved",
+        )
+        db.session.add(admin)
+        db.session.commit()
+        click.echo(f"Created new admin account '{username}'.")
+
+def _register_before_request(app):
+    from flask import request, redirect, url_for
+    from flask_login import current_user
+
+    @app.before_request
+    def restrict_admin_to_admin_area():
+        if not current_user.is_authenticated or not current_user.is_admin():
+            return
+        if request.endpoint == "static":
+            return
+        if request.blueprint in ("admin", "auth"):
+            return
+        return redirect(url_for("admin.overview"))

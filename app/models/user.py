@@ -14,9 +14,14 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    # Study goal fields — used by the Study Goals module
     daily_goal_minutes = db.Column(db.Integer, default=30, nullable=False)
     weekly_goal_minutes = db.Column(db.Integer, default=210, nullable=False)
+
+    role = db.Column(db.String(20), default="user", nullable=True)
+    status = db.Column(db.String(20), default="pending", nullable=True)
+
+    def is_admin(self):
+        return self.role == "admin"
 
     def __repr__(self):
         return f"<User {self.username}>"

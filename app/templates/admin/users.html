@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Users · NOTABL Admin{% endblock %}
+{% block content %}
+<div class="container admin-page">
+  <h1>User Management</h1>
+
+  <div class="admin-sticky-top" id="admin-sticky-top">
+    <div class="stats-bar">
+      <div class="card admin-card">
+        <span class="label-accent">Total users</span>
+        <p class="stat-value">{{ stats.total }}</p>
+      </div>
+      <div class="card admin-card">
+        <span class="label-accent">Pending</span>
+        <p class="stat-value">{{ stats.pending }}</p>
+      </div>
+      <div class="card admin-card">
+        <span class="label-accent">Approved</span>
+        <p class="stat-value">{{ stats.approved }}</p>
+      </div>
+      <div class="card admin-card">
+        <span class="label-accent">Suspended</span>
+        <p class="stat-value">{{ stats.suspended }}</p>
+      </div>
+    </div>
+
+    <form method="GET" class="filter-bar" id="admin-search-form">
+      <input type="search" name="q" class="form-control" placeholder="Search by username or email"
+             value="{{ search }}" aria-label="Search users">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <input type="hidden" name="dir" value="{{ direction }}">
+    </form>
+  </div>
+
+  {% if pending %}
+    <h2>Pending approval</h2>
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Username</th><th>Email</th><th>Registered</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for user in pending %}
+            <tr>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+              <td class="admin-table-actions">
+                <form method="POST" action="{{ url_for('admin.approve', user_id=user.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.reject', user_id=user.id) }}"
+                      data-confirm-message="Reject this account?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+  <h2>All users</h2>
+    <p class="text-muted">Admin accounts are always shown first.</p>
+
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+      <thead>
+        <tr>
+          {% for col, label in [('username', 'Username'), ('email', 'Email'), (None, 'Role'), ('status', 'Status'), ('created_at', 'Registered'), (None, 'Actions')] %}
+            <th>
+              {% if col %}
+                <a href="{{ url_for('admin.users', q=search, sort=col, dir='asc' if (sort == col and direction == 'desc') else 'desc') }}">
+                  {{ label }}{{ ' ▲' if sort == col and direction == 'asc' else ' ▼' if sort == col else '' }}
+                </a>
+              {% else %}
+                {{ label }}
+              {% endif %}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in all_users %}
+          <tr class="{{ 'admin-row--highlight' if user.is_admin() else '' }}">
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ "Admin" if user.is_admin() else "User" }}</td>
+            <td><span class="tag-chip tag-chip--{{ 'easy' if user.status == 'approved' else 'hard' if user.status == 'suspended' else 'new' }}">{{ user.status or "approved" }}</span></td>
+            <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+            <td class="admin-table-actions">
+              {% if user.id != current_user.id %}
+                {% if user.status == "suspended" %}
+                  <form method="POST" action="{{ url_for('admin.reactivate', user_id=user.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-secondary btn-sm">Reactivate</button>
+                  </form>
+                {% elif user.status not in ("pending",) %}
+                  <form method="POST" action="{{ url_for('admin.suspend', user_id=user.id) }}"
+                        data-confirm-message="Suspend this account?">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-secondary btn-sm">Suspend</button>
+                  </form>
+                {% endif %}
+                <form method="POST" action="{{ url_for('admin.delete', user_id=user.id) }}"
+                      data-delete-username="{{ user.username }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              {% else %}
+                <span class="text-muted">(you)</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" id="delete-confirm-overlay" hidden>
+  <div class="modal-panel">
+    <h3>Delete this user?</h3>
+    <p class="text-muted">This permanently deletes <strong id="delete-confirm-username"></strong> and all their data. Type the username to confirm.</p>
+    <input type="text" class="form-control" id="delete-confirm-input" placeholder="Type username" autocomplete="off">
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" id="delete-confirm-cancel">Cancel</button>
+      <button type="button" class="btn btn-danger" id="delete-confirm-submit" disabled>Delete permanently</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const searchForm = document.getElementById("admin-search-form");
+  const searchInput = searchForm.querySelector('input[name="q"]');
+  let debounceTimer = null;
+  searchInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => searchForm.submit(), 500);
+  });
+</script>
+{% endblock %}

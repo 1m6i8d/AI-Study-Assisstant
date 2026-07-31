@@ -25,7 +25,7 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash("Account created. You can now log in.", "success")
+        flash("Account created. An administrator will review your account before you can log in.", "info")
         return redirect(url_for("auth.login"))
 
     return render_template("auth/register.html", form=form)
@@ -43,6 +43,15 @@ def login():
 
         if user is None or not bcrypt.check_password_hash(user.password_hash, form.password.data):
             flash("Invalid email or password.", "error")
+            return render_template("auth/login.html", form=form)
+
+        if user.status in ("pending", "suspended", "rejected"):
+            messages = {
+                "pending": "Your account is pending admin approval.",
+                "suspended": "Your account has been suspended. Contact the administrator.",
+                "rejected": "Your registration was not approved. Contact the administrator.",
+            }
+            flash(messages[user.status], "error")
             return render_template("auth/login.html", form=form)
 
         login_user(user, remember=bool(form.remember_me.data))

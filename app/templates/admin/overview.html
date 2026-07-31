@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Overview · NOTABL Admin{% endblock %}
+{% block content %}
+<div class="container admin-page">
+  <h1>Platform Overview</h1>
+
+  <h2>Accounts</h2>
+  <div class="stats-bar">
+    <div class="card admin-card">
+      <span class="label-accent">Total users</span>
+      <p class="stat-value">{{ user_stats.total }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Pending</span>
+      <p class="stat-value">{{ user_stats.pending }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Approved</span>
+      <p class="stat-value">{{ user_stats.approved }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Suspended</span>
+      <p class="stat-value">{{ user_stats.suspended }}</p>
+    </div>
+  </div>
+
+  <h2>Content created platform-wide</h2>
+  <div class="stats-bar">
+    <div class="card admin-card">
+      <span class="label-accent">Subjects</span>
+      <p class="stat-value">{{ stats.total_subjects }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Notes</span>
+      <p class="stat-value">{{ stats.total_notes }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Flashcards</span>
+      <p class="stat-value">{{ stats.total_flashcards }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Quizzes generated</span>
+      <p class="stat-value">{{ stats.total_quizzes }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Quiz attempts</span>
+      <p class="stat-value">{{ stats.total_quiz_attempts }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Completed study sessions</span>
+      <p class="stat-value">{{ stats.total_study_sessions }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">AI Tutor messages</span>
+      <p class="stat-value">{{ stats.total_chat_messages }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Timetable entries</span>
+      <p class="stat-value">{{ stats.total_timetable_entries }}</p>
+    </div>
+    <div class="card admin-card">
+      <span class="label-accent">Library items saved</span>
+      <p class="stat-value">{{ stats.total_library_items }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

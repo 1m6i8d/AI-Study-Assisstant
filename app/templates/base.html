@@ -23,10 +23,16 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
   {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if current_user.is_authenticated and current_user.is_admin() %}admin-body{% endif %}">
   <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
 
-  {% include 'partials/_navbar.html' %}
+  {% block navbar %}
+    {% if current_user.is_authenticated and current_user.is_admin() %}
+      {% include 'partials/_admin_navbar.html' %}
+    {% else %}
+      {% include 'partials/_navbar.html' %}
+    {% endif %}
+  {% endblock %}
 
   <main id="main-content">
     {% include 'partials/_flash_messages.html' %}
@@ -50,5 +56,6 @@
   </div>
   <script src="{{ url_for('static', filename='js/confirm-modal.js') }}"></script>
   <script src="{{ url_for('static', filename='js/navbar-search.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/admin-delete-confirm.js') }}"></script>
 </body>
 </html>

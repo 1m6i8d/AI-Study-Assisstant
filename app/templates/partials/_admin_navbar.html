@@ -1,0 +1,11 @@
+<nav class="admin-navbar" aria-label="Admin navigation">
+  <div class="container admin-navbar-inner">
+    <a class="admin-navbar-brand" href="{{ url_for('admin.overview') }}">NOTABL <span>Admin</span></a>
+    <div class="admin-navbar-links">
+      <a href="{{ url_for('admin.overview') }}" class="admin-nav-link {{ 'admin-nav-link--active' if request.endpoint == 'admin.overview' else '' }}">Overview</a>
+      <a href="{{ url_for('admin.users') }}" class="admin-nav-link {{ 'admin-nav-link--active' if request.endpoint == 'admin.users' else '' }}">Users</a>
+      <a href="{{ url_for('auth.profile') }}" class="admin-nav-link">My account</a>
+      <a href="{{ url_for('auth.logout') }}" class="admin-nav-link">Log out</a>
+    </div>
+  </div>
+</nav>
